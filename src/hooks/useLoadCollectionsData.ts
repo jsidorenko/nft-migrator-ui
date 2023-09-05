@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 
 import { useCollections } from '@hooks/useCollections.ts';
 
-export const useLoadOwnedCollections = () => {
-  const { getOwnedCollections, ownedCollections } = useCollections();
+export const useLoadOwnedNftsCollections = () => {
+  const { getOwnedCollections, ownedNftsCollections } = useCollections();
 
   useEffect(() => {
     getOwnedCollections('nfts');
   }, [getOwnedCollections]);
 
-  return ownedCollections;
+  return ownedNftsCollections;
 };
 
 export const useLoadOwnedUniquesCollections = () => {

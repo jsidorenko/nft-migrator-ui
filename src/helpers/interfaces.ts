@@ -20,14 +20,14 @@ export interface CommonStyleProps {
 }
 export interface CollectionMetadata extends CollectionMetadataData {
   id: string;
+  metadata?: string;
+  isMapped?: boolean;
 }
 
 export interface CollectionMetadataData {
   name: string;
   description?: string;
   image?: string;
-  metadata?: string;
-  isMapped?: boolean;
 }
 
 export interface CollectionMetadataPrimitive {

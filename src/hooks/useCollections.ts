@@ -21,7 +21,7 @@ export const useCollections = () => {
   const { api, activeAccount, activeWallet } = useAccounts();
   const navigate = useNavigate();
   const { openModalStatus, setStatus, setAction } = useModalStatus();
-  const [ownedCollections, setOwnedCollections] = useState<CollectionMetadata[] | null>(null);
+  const [ownedNftsCollections, setOwnedNftsCollections] = useState<CollectionMetadata[] | null>(null);
   const [ownedUniquesCollections, setOwnedUniquesCollections] = useState<CollectionMetadata[] | null>(null);
   const [collectionMetadata, setCollectionMetadata] = useState<CollectionMetadata | null>(null);
   const [isCollectionDataLoading, setIsCollectionDataLoading] = useState(false);
@@ -49,31 +49,59 @@ export const useCollections = () => {
     [api, activeAccount],
   );
 
+  const fetchCollectionsMetadata = useCallback(
+    async (pallet: NFT_PALLETS, collections: string[]) => {
+      if (!api) return;
+
+      const rawMetadata =
+        pallet === 'nfts'
+          ? await api.query.nfts.collectionMetadataOf.multi(collections)
+          : await api.query.uniques.classMetadataOf.multi(collections);
+
+      if (Array.isArray(rawMetadata) && rawMetadata.length > 0) {
+        return rawMetadata.map((data) => {
+          const metadata = data.toPrimitive() as unknown as CollectionMetadataPrimitive;
+          return metadata?.data || null;
+        });
+      }
+    },
+    [api],
+  );
+
   const getOwnedCollections = useCallback(
     async (pallet: NFT_PALLETS) => {
       if (api) {
         setIsCollectionDataLoading(true);
-        const updateState = pallet === 'nfts' ? setOwnedCollections : setOwnedUniquesCollections;
+        const updateState = pallet === 'nfts' ? setOwnedNftsCollections : setOwnedUniquesCollections;
 
         try {
           let collections: CollectionMetadata[] = [];
 
           const ownedCollectionIds = await getOwnedCollectionIds(pallet);
+
           if (!ownedCollectionIds) {
             updateState(collections);
             return;
           }
 
-          const rawMetadata =
-            pallet === 'nfts'
-              ? await api.query.nfts.collectionMetadataOf.multi(ownedCollectionIds)
-              : await api.query.uniques.classMetadataOf.multi(ownedCollectionIds);
+          const metadataRecords = await fetchCollectionsMetadata(pallet, ownedCollectionIds);
 
-          if (Array.isArray(rawMetadata) && rawMetadata.length > 0) {
-            const metadataRecords = rawMetadata.map((data) => {
-              const metadata = data.toPrimitive() as unknown as CollectionMetadataPrimitive;
-              return metadata?.data || null;
-            });
+          if (metadataRecords && metadataRecords.length > 0) {
+            const otherPallet: NFT_PALLETS = pallet === 'nfts' ? 'uniques' : 'nfts';
+            const ownedCollectionIdsInOtherPallet = await getOwnedCollectionIds(otherPallet);
+            const mappedCollections: Map<string, string> = new Map();
+
+            // TODO: think about naming
+            if (ownedCollectionIdsInOtherPallet) {
+              await fetchCollectionsMetadata(pallet, ownedCollectionIdsInOtherPallet).then((data) => {
+                if (!data) return;
+                data.forEach((metadata, index) => {
+                  if (metadata) {
+                    mappedCollections.set(metadata, ownedCollectionIdsInOtherPallet[index]);
+                  }
+                });
+              });
+            }
 
             const fetchCalls = metadataRecords.map((metadata) => {
               if (!metadata) {
@@ -91,6 +119,7 @@ export const useCollections = () => {
                 description: data?.description,
                 image: getCidHash(data?.image),
                 metadata: metadataRecords[index] || undefined,
+                isMapped: !!metadataRecords[index] && mappedCollections.has(metadataRecords[index] as string),
               };
             });
           }
@@ -103,7 +132,7 @@ export const useCollections = () => {
         }
       }
     },
-    [api, getOwnedCollectionIds],
+    [api, getOwnedCollectionIds, fetchCollectionsMetadata],
   );
 
   const getCollectionMetadata = useCallback(
@@ -258,7 +287,7 @@ export const useCollections = () => {
     getCollectionMetadata,
     saveCollectionMetadata,
     createCollection,
-    ownedCollections,
+    ownedNftsCollections,
     ownedUniquesCollections,
     collectionMetadata,
     isCollectionDataLoading,

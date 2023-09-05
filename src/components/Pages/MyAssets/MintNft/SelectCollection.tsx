@@ -9,7 +9,7 @@ import IconArrowButton from '@buttons/IconArrowButton.tsx';
 import { CssFontRegularM, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
-import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
+import { useLoadOwnedNftsCollections } from '@hooks/useLoadCollectionsData.ts';
 
 import CollectionIcon from '@images/icons/collection.svg';
 
@@ -59,7 +59,7 @@ const SCollectionOption = styled(Link)`
 `;
 
 const SelectCollection = () => {
-  const collections = useLoadOwnedCollections();
+  const collections = useLoadOwnedNftsCollections();
 
   if (collections === null) {
     return <>Gathering data... please wait</>;

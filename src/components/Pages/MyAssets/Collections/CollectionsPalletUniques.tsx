@@ -51,10 +51,6 @@ const PalletSelector = styled.div`
 const CollectionsPalletUniques = () => {
   const collections = useLoadOwnedUniquesCollections();
 
-  if (collections === null) {
-    return <>Gathering data... please wait</>;
-  }
-
   return (
     <>
       <Title className='main no-margin'>
@@ -81,9 +77,9 @@ const CollectionsPalletUniques = () => {
         </RuleSteps>
       </RulesBlock>
 
-      {Array.isArray(collections) && collections.length === 0 ? (
-        <>No collections found</>
-      ) : (
+      {collections === null && <>Gathering data... please wait</>}
+
+      {Array.isArray(collections) && collections.length > 0 && (
         <SContentBlockContainer>
           <STable>
             <tbody>
@@ -94,6 +90,8 @@ const CollectionsPalletUniques = () => {
           </STable>
         </SContentBlockContainer>
       )}
+
+      {Array.isArray(collections) && collections.length === 0 && <>No collections found</>}
     </>
   );
 };

@@ -8,7 +8,7 @@ import Title from '@common/Title.tsx';
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
-import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
+import { useLoadOwnedNftsCollections } from '@hooks/useLoadCollectionsData.ts';
 
 import CollectionPalletNfts from './CollectionPalletNfts.tsx';
 
@@ -49,11 +49,7 @@ const PalletSelector = styled.div`
 `;
 
 const CollectionsPalletNfts = () => {
-  const collections = useLoadOwnedCollections();
-
-  if (collections === null) {
-    return <>Gathering data... please wait</>;
-  }
+  const collections = useLoadOwnedNftsCollections();
 
   return (
     <>
@@ -81,9 +77,9 @@ const CollectionsPalletNfts = () => {
         </RuleSteps>
       </RulesBlock>
 
-      {Array.isArray(collections) && collections.length === 0 ? (
-        <>No collections found</>
-      ) : (
+      {collections === null && <>Gathering data... please wait</>}
+
+      {Array.isArray(collections) && collections.length > 0 && (
         <SContentBlockContainer>
           <STable>
             <tbody>
@@ -94,6 +90,8 @@ const CollectionsPalletNfts = () => {
           </STable>
         </SContentBlockContainer>
       )}
+
+      {Array.isArray(collections) && collections.length === 0 && <>No collections found</>}
     </>
   );
 };
