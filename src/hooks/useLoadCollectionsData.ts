@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 
 import { useCollections } from '@hooks/useCollections.ts';
 
-export const useLoadOwnedCollectionsData = () => {
-  const { getOwnedCollectionsData, ownedCollectionsData } = useCollections();
+export const useLoadOwnedCollections = () => {
+  const { getOwnedCollections, ownedCollections } = useCollections();
 
   useEffect(() => {
-    getOwnedCollectionsData();
-  }, [getOwnedCollectionsData]);
+    getOwnedCollections();
+  }, [getOwnedCollections]);
 
-  return ownedCollectionsData;
+  return ownedCollections;
 };

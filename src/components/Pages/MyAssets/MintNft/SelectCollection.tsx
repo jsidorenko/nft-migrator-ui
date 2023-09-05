@@ -9,7 +9,7 @@ import IconArrowButton from '@buttons/IconArrowButton.tsx';
 import { CssFontRegularM, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
-import { useLoadOwnedCollectionsData } from '@hooks/useLoadCollectionsData.ts';
+import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
 
 import CollectionIcon from '@images/icons/collection.svg';
 
@@ -59,13 +59,13 @@ const SCollectionOption = styled(Link)`
 `;
 
 const SelectCollection = () => {
-  const collectionsData = useLoadOwnedCollectionsData();
+  const collections = useLoadOwnedCollections();
 
-  if (collectionsData === null) {
+  if (collections === null) {
     return <>Gathering data... please wait</>;
   }
 
-  if (Array.isArray(collectionsData) && collectionsData.length === 0) {
+  if (Array.isArray(collections) && collections.length === 0) {
     return (
       <SContainer>
         <SHugeIcon>
@@ -89,7 +89,7 @@ const SelectCollection = () => {
         <ActionButton className='main-king w-100'>Create New Collection</ActionButton>
       </Link>
       <SChoose>or select the created one</SChoose>
-      {collectionsData.map((collection) => (
+      {collections.map((collection) => (
         <SCollectionOption to={routes.myAssets.mintNft(collection.id)} key={collection.id}>
           <IconArrowButton imageCid={collection.image}>{truncate(collection.name, { length: 20 })}</IconArrowButton>
         </SCollectionOption>

@@ -21,7 +21,7 @@ export const useCollections = () => {
   const { api, activeAccount, activeWallet } = useAccounts();
   const navigate = useNavigate();
   const { openModalStatus, setStatus, setAction } = useModalStatus();
-  const [ownedCollectionsData, setOwnedCollectionsData] = useState<CollectionMetadata[] | null>(null);
+  const [ownedCollections, setOwnedCollections] = useState<CollectionMetadata[] | null>(null);
   const [collectionMetadata, setCollectionMetadata] = useState<CollectionMetadata | null>(null);
   const [isCollectionDataLoading, setIsCollectionDataLoading] = useState(false);
 
@@ -42,7 +42,7 @@ export const useCollections = () => {
     return null;
   }, [api, activeAccount]);
 
-  const getOwnedCollectionsData = useCallback(async () => {
+  const getOwnedCollections = useCallback(async () => {
     if (api) {
       setIsCollectionDataLoading(true);
 
@@ -51,7 +51,7 @@ export const useCollections = () => {
 
         const ownedCollectionIds = await getCollectionIds();
         if (!ownedCollectionIds) {
-          setOwnedCollectionsData(collections);
+          setOwnedCollections(collections);
           return;
         }
 
@@ -83,7 +83,7 @@ export const useCollections = () => {
           });
         }
 
-        setOwnedCollectionsData(collections);
+        setOwnedCollections(collections);
       } catch (error) {
         //
       } finally {
@@ -240,11 +240,11 @@ export const useCollections = () => {
   );
 
   return {
-    getOwnedCollectionsData,
+    getOwnedCollections,
     getCollectionMetadata,
     saveCollectionMetadata,
     createCollection,
-    ownedCollectionsData,
+    ownedCollections,
     collectionMetadata,
     isCollectionDataLoading,
     getCollectionConfig,

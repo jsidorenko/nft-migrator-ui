@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { Card } from 'react-bootstrap';
 import { styled } from 'styled-components';
 
@@ -6,7 +6,7 @@ import Title from '@common/Title.tsx';
 
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 
-import { useLoadOwnedCollectionsData } from '@hooks/useLoadCollectionsData.ts';
+import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
 
 import CollectionRow from './CollectionRow.tsx';
 
@@ -47,13 +47,13 @@ const PalletSelector = styled.div`
 `;
 
 const CollectionsView = () => {
-  const ownedCollections = useLoadOwnedCollectionsData();
+  const collections = useLoadOwnedCollections();
 
-  if (ownedCollections === null) {
+  if (collections === null) {
     return <>Gathering data... please wait</>;
   }
 
-  if (Array.isArray(ownedCollections) && ownedCollections.length === 0) {
+  if (Array.isArray(collections) && collections.length === 0) {
     return <>No collections found</>;
   }
 
@@ -87,7 +87,7 @@ const CollectionsView = () => {
       <SContentBlockContainer>
         <STable>
           <tbody>
-            {ownedCollections.map((collection) => (
+            {collections.map((collection) => (
               <CollectionRow key={collection.id} collection={collection} />
             ))}
           </tbody>
