@@ -2,11 +2,13 @@ import { ReactElement, memo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { CssFontRegularXL, SConnectButton } from '@helpers/reusableStyles.ts';
+import Connect from '@common/Connect.tsx';
+
+import { CssFontRegularXL } from '@helpers/reusableStyles.ts';
 
 import { useConnectToStoredAccount } from '@hooks/useConnectToStoredAccount.ts';
 
-const SDoIt = styled.div`
+const Note = styled.div`
   ${CssFontRegularXL}
   margin-bottom: 32px;
   color: ${({ theme }) => theme.textAndIconsSecondary};
@@ -20,7 +22,7 @@ interface PrivateRouteProps {
 const PrivateRoute = ({ children, redirectTo }: PrivateRouteProps) => {
   const { activeAccount, isAutoConnectDone } = useConnectToStoredAccount();
 
-  if (isAutoConnectDone === false) {
+  if (!isAutoConnectDone) {
     return null;
   }
 
@@ -29,14 +31,10 @@ const PrivateRoute = ({ children, redirectTo }: PrivateRouteProps) => {
   }
 
   if (activeAccount === null) {
-    const connect = document.getElementById('connect');
-
     return (
       <>
-        <SDoIt>Connect wallet to see this page</SDoIt>
-        <SConnectButton onClick={() => connect?.click()}>
-          <span>Connect Wallet</span>
-        </SConnectButton>
+        <Note>Connect wallet to see this page</Note>
+        <Connect />
       </>
     );
   }
