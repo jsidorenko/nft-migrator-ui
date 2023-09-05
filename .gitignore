@@ -1,0 +1,9 @@
+/node_modules
+/build
+.env.development
+
+# Local Netlify folder
+.netlify
+
+# IntelliJ files
+/.idea

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@api/*": ["./api/*"],
+      "@buttons/*": ["./components/Buttons/*"],
+      "@common/*": ["./components/Common/*"],
+      "@contexts/*": ["./contexts/*"],
+      "@header/*": ["./components/Header/*"],
+      "@helpers/*": ["./helpers/*"],
+      "@hooks/*": ["./hooks/*"],
+      "@images/*": ["./images/*"],
+      "@modals/*": ["./components/Modals/*"],
+      "@pages/*": ["./components/Pages/*"]
+    }
+  }
+}
