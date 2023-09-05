@@ -71,6 +71,8 @@ export enum ViewAsOptions {
   TABLE = 'table',
 }
 
+export type NFT_PALLETS = 'nfts' | 'uniques';
+
 export const APP_NAME = 'nft-migrator';
 export const IPFS_GATEWAY = process.env.REACT_APP_IPFS_GATEWAY;
 export const METADATA_GATEWAY = process.env.REACT_APP_METADATA_GATEWAY;

@@ -6,7 +6,7 @@ import Title from '@common/Title.tsx';
 
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 
-import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
+import { useLoadOwnedUniquesCollections } from '@hooks/useLoadCollectionsData.ts';
 
 import CollectionRow from './CollectionRow.tsx';
 
@@ -46,8 +46,8 @@ const PalletSelector = styled.div`
   }
 `;
 
-const CollectionsView = () => {
-  const collections = useLoadOwnedCollections();
+const CollectionsPalletUniques = () => {
+  const collections = useLoadOwnedUniquesCollections();
 
   if (collections === null) {
     return <>Gathering data... please wait</>;
@@ -97,4 +97,4 @@ const CollectionsView = () => {
   );
 };
 
-export default memo(CollectionsView);
+export default memo(CollectionsPalletUniques);

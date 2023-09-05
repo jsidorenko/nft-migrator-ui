@@ -10,7 +10,7 @@ import { routes } from '@helpers/routes.ts';
 
 import Main from '@pages/Main/Main.tsx';
 import CollectionEdit from '@pages/MyAssets/Collections/CollectionEdit.tsx';
-import CollectionsView from '@pages/MyAssets/Collections/CollectionsView.tsx';
+import CollectionsPalletNfts from '@pages/MyAssets/Collections/CollectionsPalletNfts.tsx';
 import CreateCollection from '@pages/MyAssets/MintNft/CreateCollection.tsx';
 import MintNft from '@pages/MyAssets/MintNft/MintNft.tsx';
 import MintNftIndex from '@pages/MyAssets/MintNft/MintNftIndex.tsx';
@@ -108,7 +108,7 @@ const App = () => (
               index
               element={
                 <PrivateRoute>
-                  <CollectionsView />
+                  <CollectionsPalletNfts />
                 </PrivateRoute>
               }
             />
