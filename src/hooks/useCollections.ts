@@ -25,7 +25,7 @@ export const useCollections = () => {
   const [collectionMetadata, setCollectionMetadata] = useState<CollectionMetadata | null>(null);
   const [isCollectionDataLoading, setIsCollectionDataLoading] = useState(false);
 
-  const getCollectionIds = useCallback(async () => {
+  const getOwnedCollectionIds = useCallback(async () => {
     if (api && activeAccount) {
       const results = await api.query.nfts.collectionAccount.keys(activeAccount.address);
 
@@ -49,7 +49,7 @@ export const useCollections = () => {
       try {
         let collections: CollectionMetadata[] = [];
 
-        const ownedCollectionIds = await getCollectionIds();
+        const ownedCollectionIds = await getOwnedCollectionIds();
         if (!ownedCollectionIds) {
           setOwnedCollections(collections);
           return;
@@ -90,7 +90,7 @@ export const useCollections = () => {
         setIsCollectionDataLoading(false);
       }
     }
-  }, [api, getCollectionIds]);
+  }, [api, getOwnedCollectionIds]);
 
   const getCollectionMetadata = useCallback(
     async (collectionId: string) => {
@@ -100,7 +100,7 @@ export const useCollections = () => {
         try {
           let metadata: CollectionMetadata | null = null;
 
-          const ownedCollectionIds = await getCollectionIds();
+          const ownedCollectionIds = await getOwnedCollectionIds();
           if (!ownedCollectionIds || !ownedCollectionIds.includes(collectionId)) {
             return;
           }
@@ -131,7 +131,7 @@ export const useCollections = () => {
         setCollectionMetadata(null);
       }
     },
-    [api, getCollectionIds],
+    [api, getOwnedCollectionIds],
   );
 
   const saveCollectionMetadata = useCallback(
