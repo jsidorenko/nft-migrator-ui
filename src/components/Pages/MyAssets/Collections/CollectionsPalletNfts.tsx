@@ -1,14 +1,16 @@
 import { memo } from 'react';
 import { Card } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import Title from '@common/Title.tsx';
 
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
+import { routes } from '@helpers/routes.ts';
 
 import { useLoadOwnedCollections } from '@hooks/useLoadCollectionsData.ts';
 
-import CollectionRow from './CollectionRow.tsx';
+import CollectionPalletNfts from './CollectionPalletNfts.tsx';
 
 const SubTitle = styled.div`
   margin-bottom: 30px;
@@ -53,18 +55,12 @@ const CollectionsPalletNfts = () => {
     return <>Gathering data... please wait</>;
   }
 
-  if (Array.isArray(collections) && collections.length === 0) {
-    return <>No collections found</>;
-  }
-
   return (
     <>
       <Title className='main no-margin'>
         <>
           <PalletSelector>
-            <a href='#' className='not-selected'>
-              Switch to pallet-uniques
-            </a>
+            <Link to={routes.myCollections.palletUniques}>Switch to pallet-uniques</Link>
           </PalletSelector>
           My Collections
         </>
@@ -84,15 +80,20 @@ const CollectionsPalletNfts = () => {
           3) upload the generated JSON file to IPFS and store its hash inside the collection`s attributes.
         </RuleSteps>
       </RulesBlock>
-      <SContentBlockContainer>
-        <STable>
-          <tbody>
-            {collections.map((collection) => (
-              <CollectionRow key={collection.id} collection={collection} />
-            ))}
-          </tbody>
-        </STable>
-      </SContentBlockContainer>
+
+      {Array.isArray(collections) && collections.length === 0 ? (
+        <>No collections found</>
+      ) : (
+        <SContentBlockContainer>
+          <STable>
+            <tbody>
+              {collections.map((collection) => (
+                <CollectionPalletNfts key={collection.id} collection={collection} />
+              ))}
+            </tbody>
+          </STable>
+        </SContentBlockContainer>
+      )}
     </>
   );
 };

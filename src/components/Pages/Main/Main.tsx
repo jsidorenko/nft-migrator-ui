@@ -95,7 +95,7 @@ const Main = () => {
         )}
         {activeAccount && (
           <SStepsContainer>
-            <SLinkCard onClick={() => navigate(routes.myAssets.collections)}>
+            <SLinkCard onClick={() => navigate(routes.myCollections.palletUniques)}>
               <Card.Body>
                 <Card.Title>For collection owners</Card.Title>
                 <Card.Text className='mb-4 mt-4'>I want to prepare my collection for the migration process</Card.Text>

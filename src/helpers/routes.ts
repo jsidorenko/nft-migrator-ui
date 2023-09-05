@@ -4,6 +4,11 @@ const NFT_ID_PARAM = ':nftId';
 export const routes = {
   homepage: '/',
 
+  myCollections: {
+    palletNfts: '/my-collections/pallet-nfts',
+    palletUniques: '/my-collections/pallet-uniques',
+  },
+
   myAssets: {
     index: '/my-assets',
 
