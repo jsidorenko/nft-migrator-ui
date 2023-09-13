@@ -21,7 +21,7 @@ const SName = styled.div`
   ${CssFontSemiBoldL};
 `;
 
-const SMetadata = styled.div`
+const SMapped = styled.div`
   ${CssFontRegularXS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
@@ -30,18 +30,12 @@ const SCounter = styled.div`
   ${CssFontRegularS};
 `;
 
-const ReadyButton = styled(ActionButton)`
-  &:hover {
-    cursor: default !important;
-  }
-`;
-
 interface CollectionRowProps {
   collection: CollectionMetadata;
 }
 
 const CollectionRow = ({ collection }: CollectionRowProps) => {
-  const { id, name, description, image, metadata, isMapped } = collection;
+  const { id, name, description, image, isMapped } = collection;
   const counter = useCountOwnedNfts(id);
   /*const navigate = useNavigate();
 
@@ -56,22 +50,20 @@ const CollectionRow = ({ collection }: CollectionRowProps) => {
       </STableImage>
       <td>
         <SName>{name || '- no title -'}</SName>
-        <SMetadata>Metadata: {metadata || '-'}</SMetadata>
+        <SMapped>
+          Mapped: <b>{isMapped ? 'yes' : 'no'}</b>
+        </SMapped>
         <SCounter>{counter}</SCounter>
       </td>
-      <td align='center'>
-        {isMapped ? (
-          <ReadyButton className='main-light w-100'>Ready</ReadyButton>
-        ) : (
-          <Link to='..' className='w-25'>
-            <ActionButton type='button' className='secondary w-100'>
-              Clone
-            </ActionButton>
-          </Link>
-        )}
+      <td align='center' className='w-25'>
+        <Link to='..'>
+          <ActionButton type='button' className='stroke w-100'>
+            Change team
+          </ActionButton>
+        </Link>
       </td>
-      <td align='right'>
-        <Link to='..' className='w-25'>
+      <td align='right' className='w-25'>
+        <Link to='..'>
           <ActionButton type='button' className='stroke w-100'>
             Attach snapshot
           </ActionButton>

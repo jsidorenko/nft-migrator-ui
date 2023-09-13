@@ -1,7 +1,6 @@
+import type { PalletNftsCollectionSetting } from '@polkadot/types/lookup';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { saveDataToIpfs } from '@api/pinata.ts';
 
 import { useAccounts } from '@contexts/AccountsContext.tsx';
 import { useModalStatus } from '@contexts/ModalStatusContext.tsx';
@@ -10,12 +9,20 @@ import { ModalStatusTypes, NFT_PALLETS, StatusMessages } from '@helpers/config.t
 import { handleError } from '@helpers/handleError.ts';
 import {
   CollectionConfig,
+  CollectionConfigJson,
   CollectionMetadata,
-  CollectionMetadataData,
-  CollectionMetadataPrimitive,
+  CollectionMetadataRecordNfts,
+  CollectionMetadataRecordUniques,
 } from '@helpers/interfaces.ts';
 import { routes } from '@helpers/routes.ts';
-import { getCidHash, getCidUrl, getFetchableMetadataUrl, getFetchableUrl } from '@helpers/utilities.ts';
+import {
+  BitFlags,
+  fetchJson,
+  getCidHash,
+  getEnumOptions,
+  getFetchableMetadataUrl,
+  getFetchableUrl,
+} from '@helpers/utilities.ts';
 
 export const useCollections = () => {
   const { api, activeAccount, activeWallet } = useAccounts();
@@ -23,11 +30,12 @@ export const useCollections = () => {
   const { openModalStatus, setStatus, setAction } = useModalStatus();
   const [ownedNftsCollections, setOwnedNftsCollections] = useState<CollectionMetadata[] | null>(null);
   const [ownedUniquesCollections, setOwnedUniquesCollections] = useState<CollectionMetadata[] | null>(null);
-  const [collectionMetadata, setCollectionMetadata] = useState<CollectionMetadata | null>(null);
-  const [isCollectionDataLoading, setIsCollectionDataLoading] = useState(false);
+  const [collectionNftsMetadata, setCollectionNftsMetadata] = useState<CollectionMetadata | null>(null);
+  const [collectionUniquesMetadata, setCollectionUniquesMetadata] = useState<CollectionMetadata | null>(null);
+  const [isCollectionMetadataLoading, setIsCollectionMetadataLoading] = useState(false);
 
   const getOwnedCollectionIds = useCallback(
-    async (pallet: NFT_PALLETS = 'nfts') => {
+    async (pallet: NFT_PALLETS) => {
       if (api && activeAccount) {
         const results =
           pallet === 'nfts'
@@ -49,6 +57,17 @@ export const useCollections = () => {
     [api, activeAccount],
   );
 
+  const getCollectionConfig = useCallback(
+    async (collectionId: string) => {
+      if (api) {
+        const config = await api.query.nfts.collectionConfigOf(collectionId);
+
+        return config;
+      }
+    },
+    [api],
+  );
+
   const fetchCollectionsMetadata = useCallback(
     async (pallet: NFT_PALLETS, collections: string[]) => {
       if (!api) return;
@@ -60,7 +79,9 @@ export const useCollections = () => {
 
       if (Array.isArray(rawMetadata) && rawMetadata.length > 0) {
         return rawMetadata.map((data) => {
-          const metadata = data.toPrimitive() as unknown as CollectionMetadataPrimitive;
+          const metadata = data.toPrimitive() as unknown as
+            | CollectionMetadataRecordUniques
+            | CollectionMetadataRecordNfts;
           return metadata?.data || null;
         });
       }
@@ -71,7 +92,7 @@ export const useCollections = () => {
   const getOwnedCollections = useCallback(
     async (pallet: NFT_PALLETS) => {
       if (api) {
-        setIsCollectionDataLoading(true);
+        setIsCollectionMetadataLoading(true);
         const updateState = pallet === 'nfts' ? setOwnedNftsCollections : setOwnedUniquesCollections;
 
         try {
@@ -89,9 +110,8 @@ export const useCollections = () => {
           if (metadataRecords && metadataRecords.length > 0) {
             const otherPallet: NFT_PALLETS = pallet === 'nfts' ? 'uniques' : 'nfts';
             const ownedCollectionIdsInOtherPallet = await getOwnedCollectionIds(otherPallet);
-            const mappedCollections: Map<string, string> = new Map();
+            const mappedCollections: Map<string, string> = new Map(); // metadata => collection's id (in another pallet)
 
-            // TODO: think about naming
             if (ownedCollectionIdsInOtherPallet) {
               await fetchCollectionsMetadata(pallet, ownedCollectionIdsInOtherPallet).then((data) => {
                 if (!data) return;
@@ -120,6 +140,7 @@ export const useCollections = () => {
                 image: getCidHash(data?.image),
                 metadata: metadataRecords[index] || undefined,
                 isMapped: !!metadataRecords[index] && mappedCollections.has(metadataRecords[index] as string),
+                raw: data ? JSON.stringify(data) : undefined,
               };
             });
           }
@@ -128,7 +149,7 @@ export const useCollections = () => {
         } catch (error) {
           console.error(error);
         } finally {
-          setIsCollectionDataLoading(false);
+          setIsCollectionMetadataLoading(false);
         }
       }
     },
@@ -136,66 +157,95 @@ export const useCollections = () => {
   );
 
   const getCollectionMetadata = useCallback(
-    async (collectionId: string) => {
+    async (collectionId: string, pallet: NFT_PALLETS) => {
+      const updateState = pallet === 'nfts' ? setCollectionNftsMetadata : setCollectionUniquesMetadata;
+
       if (api && collectionId) {
-        setIsCollectionDataLoading(true);
+        setIsCollectionMetadataLoading(true);
 
         try {
           let metadata: CollectionMetadata | null = null;
 
-          const ownedCollectionIds = await getOwnedCollectionIds();
-          if (!ownedCollectionIds || !ownedCollectionIds.includes(collectionId)) {
-            return;
-          }
-
-          const rawMetadata = await api.query.nfts.collectionMetadataOf(collectionId);
+          const rawMetadata =
+            pallet === 'nfts'
+              ? await api.query.nfts.collectionMetadataOf(collectionId)
+              : await api.query.uniques.classMetadataOf(collectionId);
 
           if (rawMetadata) {
-            const primitiveMetadata = rawMetadata.toPrimitive() as unknown as CollectionMetadataPrimitive;
-            if (!primitiveMetadata?.data) {
-              return null;
+            let metadataIsLocked = true;
+            let attributesAreLocked = true;
+            let metadataLink;
+
+            if (pallet === 'uniques') {
+              const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordUniques;
+              metadataLink = metadataInfo.data;
+              metadataIsLocked = metadataInfo.isFrozen;
+              attributesAreLocked = metadataInfo.isFrozen;
+            } else {
+              const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordNfts;
+              metadataLink = metadataInfo.data;
+
+              const config = await getCollectionConfig(collectionId);
+              if (!config || !config.isSome) {
+                throw new Error('Collection`s config not found');
+              }
+
+              type CollectionSettings = PalletNftsCollectionSetting['type'];
+              const collectionConfig = config.unwrap().toJSON() as unknown as CollectionConfigJson;
+              const options = getEnumOptions(api, 'PalletNftsCollectionSetting') as CollectionSettings[];
+              const settings = new BitFlags<CollectionSettings>(options, true);
+
+              metadataIsLocked = !settings.has('UnlockedMetadata', collectionConfig.settings);
+              attributesAreLocked = !settings.has('UnlockedAttributes', collectionConfig.settings);
             }
 
-            const fetchedData = await fetch(getFetchableUrl(primitiveMetadata.data));
-
-            metadata = await fetchedData.json();
-            if (metadata?.image) {
-              metadata.image = getCidHash(metadata.image);
+            let fetchedData = null;
+            if (metadataLink) {
+              fetchedData = await fetchJson(getFetchableUrl(metadataLink));
             }
+
+            metadata = {
+              id: collectionId,
+              metadataLink,
+              metadataIsLocked,
+              attributesAreLocked,
+              json: fetchedData || undefined,
+            };
           }
 
-          setCollectionMetadata(metadata);
+          updateState(metadata);
         } catch (error) {
-          //
+          updateState(null);
         } finally {
-          setIsCollectionDataLoading(false);
+          setIsCollectionMetadataLoading(false);
         }
       } else {
-        setCollectionMetadata(null);
+        updateState(null);
       }
     },
-    [api, getOwnedCollectionIds],
+    [api, getCollectionConfig],
   );
 
-  const saveCollectionMetadata = useCallback(
-    async (collectionId: string, collectionMetadata: CollectionMetadataData) => {
+  const finishCollectionCreation = useCallback(
+    async (collectionId: string, collectionMetadata: string, newCollectionSettings: number | null) => {
       if (api && activeAccount && activeWallet) {
         setStatus({ type: ModalStatusTypes.INIT_TRANSACTION, message: StatusMessages.TRANSACTION_CONFIRM });
         openModalStatus();
 
         try {
-          if (collectionMetadata.image) {
-            collectionMetadata.image = getCidUrl(collectionMetadata.image);
+          const txs = [];
+          txs.push(api.tx.nfts.setCollectionMetadata(collectionId, collectionMetadata));
+          if (newCollectionSettings !== null) {
+            txs.push(api.tx.nfts.lockCollection(collectionId, newCollectionSettings));
           }
+          const txBatch = api.tx.utility.batchAll(txs);
 
-          const cid = await saveDataToIpfs(collectionMetadata);
-          const metadataCid = getCidUrl(cid);
-
-          const unsub = await api.tx.nfts
-            .setCollectionMetadata(collectionId, metadataCid)
-            .signAndSend(activeAccount.address, { signer: activeWallet.signer }, ({ events, status }) => {
+          const unsub = await txBatch.signAndSend(
+            activeAccount.address,
+            { signer: activeWallet.signer },
+            ({ events, status }) => {
               if (status.isReady) {
-                setStatus({ type: ModalStatusTypes.IN_PROGRESS, message: StatusMessages.METADATA_UPDATING });
+                setStatus({ type: ModalStatusTypes.IN_PROGRESS, message: StatusMessages.COLLECTION_CREATED });
               }
 
               if (status.isInBlock) {
@@ -204,14 +254,14 @@ export const useCollections = () => {
                 events.some(({ event: { method } }) => {
                   if (method === 'ExtrinsicSuccess') {
                     setStatus({ type: ModalStatusTypes.COMPLETE, message: StatusMessages.METADATA_UPDATED });
-                    setAction(() => () => navigate(routes.myAssets.mintNftMain));
+                    setAction(() => () => navigate(routes.myCollections.palletNfts));
 
                     return true;
                   }
 
                   if (method === 'ExtrinsicFailed') {
                     setStatus({ type: ModalStatusTypes.ERROR, message: StatusMessages.ACTION_FAILED });
-                    setAction(() => () => navigate(routes.myAssets.mintNftMain));
+                    setAction(() => () => navigate(routes.myCollections.palletUniques));
 
                     return true;
                   }
@@ -219,7 +269,8 @@ export const useCollections = () => {
                   return false;
                 });
               }
-            });
+            },
+          );
         } catch (error) {
           setStatus({ type: ModalStatusTypes.ERROR, message: handleError(error) });
         }
@@ -229,7 +280,7 @@ export const useCollections = () => {
   );
 
   const createCollection = useCallback(
-    async (collectionConfig: CollectionConfig, collectionMetadata: CollectionMetadataData) => {
+    async (collectionConfig: CollectionConfig, collectionMetadata: string, settingsAfter: number | null) => {
       if (api && activeAccount && activeWallet) {
         setStatus({ type: ModalStatusTypes.INIT_TRANSACTION, message: StatusMessages.TRANSACTION_CONFIRM });
         openModalStatus();
@@ -248,7 +299,7 @@ export const useCollections = () => {
                   if (method === 'Created') {
                     setStatus({ type: ModalStatusTypes.COMPLETE, message: StatusMessages.COLLECTION_CREATED });
                     const mintedCollectionId = data[0].toString();
-                    saveCollectionMetadata(mintedCollectionId, collectionMetadata);
+                    finishCollectionCreation(mintedCollectionId, collectionMetadata, settingsAfter);
 
                     return true;
                   }
@@ -268,29 +319,48 @@ export const useCollections = () => {
         }
       }
     },
-    [api, activeAccount, activeWallet, setStatus, openModalStatus, saveCollectionMetadata],
+    [api, activeAccount, activeWallet, setStatus, openModalStatus, finishCollectionCreation],
   );
 
-  const getCollectionConfig = useCallback(
-    async (collectionId: string) => {
-      if (api) {
-        const config = await api.query.nfts.collectionConfigOf(collectionId);
-
-        return config;
+  const validateOwnedCollection = useCallback(
+    async (collectionId: string, pallet: NFT_PALLETS) => {
+      let result = false;
+      if (api && activeAccount) {
+        switch (pallet) {
+          case 'nfts':
+            {
+              const collection = await api.query.nfts.collection(collectionId);
+              if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
+                result = true;
+              }
+            }
+            break;
+          case 'uniques':
+            {
+              const collection = await api.query.uniques.class(collectionId);
+              if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
+                result = true;
+              }
+            }
+            break;
+        }
       }
+
+      return result;
     },
-    [api],
+    [api, activeAccount],
   );
 
   return {
     getOwnedCollections,
     getCollectionMetadata,
-    saveCollectionMetadata,
     createCollection,
     ownedNftsCollections,
     ownedUniquesCollections,
-    collectionMetadata,
-    isCollectionDataLoading,
+    collectionNftsMetadata,
+    collectionUniquesMetadata,
+    isCollectionMetadataLoading,
     getCollectionConfig,
+    validateOwnedCollection,
   };
 };

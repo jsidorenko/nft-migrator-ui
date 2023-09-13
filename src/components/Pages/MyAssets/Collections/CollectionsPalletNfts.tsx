@@ -63,17 +63,15 @@ const CollectionsPalletNfts = () => {
       </Title>
       <SubTitle>*pallet nfts</SubTitle>
       <RulesBlock>
-        <RuleTitle>To migrate nfts to the new pallet:</RuleTitle>
+        <RuleTitle>Migration rules:</RuleTitle>
         <RuleSteps>
-          1) a new collection with exactly the same metadata in the pallet-nfts needs to be created;
+          1) a collection is considered mapped when there is a similar collection created in another pallet that has the
+          same metadata and the same owner;
           <br />
-          2) use{' '}
-          <a href='https://github.com/jsidorenko/nft-migrator/' target='_blank' rel='noreferrer'>
-            nft-migrator
-          </a>{' '}
-          scripts to take a data snapshot and sign it with the admin`s account;
+          2) the data snapshot needs to be attached to the source collection`s attributes;
           <br />
-          3) upload the generated JSON file to IPFS and store its hash inside the collection`s attributes.
+          3) if the source collection in the pallet-uniques is locked, then the snapshot can be attached to the cloned
+          collection.
         </RuleSteps>
       </RulesBlock>
 

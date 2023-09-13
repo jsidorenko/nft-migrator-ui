@@ -1,3 +1,5 @@
+import { AnyJson } from '@polkadot/types/types';
+
 import {
   ChainThemes,
   ChainTitles,
@@ -18,21 +20,31 @@ export interface CommonStyleProps {
   required?: boolean;
   title?: string;
 }
-export interface CollectionMetadata extends CollectionMetadataData {
+export interface CollectionMetadata {
   id: string;
-  metadata?: string;
+  metadataLink: string;
   isMapped?: boolean;
+  json?: AnyJson;
+  metadataIsLocked: boolean;
+  attributesAreLocked: boolean;
 }
 
+// TODO: remove
 export interface CollectionMetadataData {
   name: string;
   description?: string;
   image?: string;
 }
 
-export interface CollectionMetadataPrimitive {
+export interface CollectionMetadataRecordNfts {
   data: string;
   deposit: string;
+}
+
+export interface CollectionMetadataRecordUniques {
+  data: string;
+  deposit: string;
+  isFrozen: boolean;
 }
 
 export interface CollectionConfig {

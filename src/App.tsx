@@ -9,10 +9,9 @@ import { ALTERNATE_BACKGROUND_CLASSNAME, mediaQueries } from '@helpers/reusableS
 import { routes } from '@helpers/routes.ts';
 
 import Main from '@pages/Main/Main.tsx';
-import CollectionEdit from '@pages/MyAssets/Collections/CollectionEdit.tsx';
 import CollectionsPalletNfts from '@pages/MyAssets/Collections/CollectionsPalletNfts.tsx';
 import CollectionsPalletUniques from '@pages/MyAssets/Collections/CollectionsPalletUniques.tsx';
-import CreateCollection from '@pages/MyAssets/MintNft/CreateCollection.tsx';
+import CreateCollection from '@pages/MyAssets/Collections/CreateCollection.tsx';
 import MintNft from '@pages/MyAssets/MintNft/MintNft.tsx';
 import MintNftIndex from '@pages/MyAssets/MintNft/MintNftIndex.tsx';
 import SelectCollection from '@pages/MyAssets/MintNft/SelectCollection.tsx';
@@ -90,6 +89,15 @@ const App = () => (
           }
         />
 
+        <Route
+          path={routes.myCollections.cloneCollection()}
+          element={
+            <PrivateRoute>
+              <CreateCollection />
+            </PrivateRoute>
+          }
+        />
+
         <Route path={routes.myAssets.index} element={<Outlet />}>
           <Route index element={<Navigate to={routes.myAssets.mintNftMain} replace />} />
 
@@ -128,15 +136,6 @@ const App = () => (
               element={
                 <PrivateRoute>
                   <CollectionsPalletNfts />
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path={routes.myAssets.collectionEdit()}
-              element={
-                <PrivateRoute redirectTo={routes.myAssets.collections}>
-                  <CollectionEdit />
                 </PrivateRoute>
               }
             />

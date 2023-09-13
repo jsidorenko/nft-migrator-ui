@@ -7,6 +7,7 @@ export const routes = {
   myCollections: {
     palletNfts: '/my-collections/pallet-nfts',
     palletUniques: '/my-collections/pallet-uniques',
+    cloneCollection: (collectionId: string = COLLECTION_ID_PARAM) => `/my-collections/clone-collection/${collectionId}`,
   },
 
   myAssets: {
@@ -17,7 +18,6 @@ export const routes = {
     mintNft: (collectionId: string = COLLECTION_ID_PARAM) => `/my-assets/mint-nft/${collectionId}/mint`,
 
     collections: '/my-assets/collections',
-    collectionEdit: (collectionId: string = COLLECTION_ID_PARAM) => `/my-assets/collections/edit/${collectionId}`,
     nfts: (collectionId: string = COLLECTION_ID_PARAM) => `/my-assets/collections/${collectionId}/nfts`,
     nftEdit: (collectionId: string = COLLECTION_ID_PARAM, nftId: string = NFT_ID_PARAM) =>
       `/my-assets/collections/${collectionId}/nfts/edit/${nftId}`,

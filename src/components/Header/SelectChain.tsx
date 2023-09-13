@@ -15,7 +15,7 @@ import ArrowIcon from '@images/icons/arrow.svg';
 import KusamaAssetHub from '@images/icons/chain-kusama-asset-hub.svg';
 import Localhost from '@images/icons/chain-localhost.svg';
 import PolkadotAssetHub from '@images/icons/chain-polkadot-asset-hub.svg';
-import RococoAssetHub from '@images/icons/chain-rococo-asset-hub.svg';
+// import RococoAssetHub from '@images/icons/chain-rococo-asset-hub.svg';
 import WestendAssetHub from '@images/icons/chain-westend-asset-hub.svg';
 import TickIcon from '@images/icons/tick.svg';
 
@@ -23,7 +23,7 @@ const ChainIcons = {
   [ChainTitles.POLKADOT_ASSET_HUB]: PolkadotAssetHub,
   [ChainTitles.KUSAMA_ASSET_HUB]: KusamaAssetHub,
   [ChainTitles.WESTEND_ASSET_HUB]: WestendAssetHub,
-  [ChainTitles.ROCOCO_ASSET_HUB]: RococoAssetHub,
+  // [ChainTitles.ROCOCO_ASSET_HUB]: RococoAssetHub,
   [ChainTitles.LOCALHOST]: Localhost,
 };
 
@@ -69,7 +69,7 @@ const SChainList = styled.div`
   right: 0;
   margin-top: 12px;
   padding: 16px;
-  box-shadow: 0px 2px 8px ${({ theme }) => theme.fill25};
+  box-shadow: 0 2px 8px ${({ theme }) => theme.fill25};
   background-color: ${({ theme }) => theme.backgroundTertiary};
   color: ${({ theme }) => theme.textAndIconsPrimary};
   border-radius: 12px;

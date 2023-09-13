@@ -41,7 +41,7 @@ export enum StatusMessages {
   COLLECTION_CREATED = 'Collection created!',
   COLLECTION_CREATING = 'Creating collection, please wait',
   METADATA_UPDATED = 'Metadata updated',
-  METADATA_UPDATING = 'Updating metadata, please wait',
+  METADATA_UPDATING = 'Setting metadata, please wait',
   NFT_MINTED = 'NFT minted!',
   NFT_MINTING = 'Minting NFT, please wait',
   TRANSACTION_CANCELED = 'Transaction was canceled',

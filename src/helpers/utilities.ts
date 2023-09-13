@@ -1,4 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
+import { getTypeDef } from '@polkadot/types';
+import { AnyJson } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { ToBn } from '@polkadot/util/types';
 import { FormEvent } from 'react';
@@ -12,18 +14,6 @@ export const ellipseAddress = (address = '', charCount = 4): string => {
   }
 
   return `${address.slice(0, charCount)}...${address.slice(-charCount)}`;
-};
-
-// the values are flipped to opposite because in the nfts pallet we use bitflags
-// where we select what to disable, so in pallet true = disabled, false = enabled
-// in order to not confuse users, in UI we use normal logic and then flip values here
-export const toBitFlag = (values: boolean[]): number => {
-  const bitFlag = values
-    .map((value) => +!value)
-    .reverse()
-    .join('');
-
-  return parseInt(bitFlag, 2);
 };
 
 export const toUint8Array = (data: string) => new TextEncoder().encode(data);
@@ -157,3 +147,50 @@ export const getFetchableMetadataUrl = (cid: string) => {
 
   return `${METADATA_GATEWAY}${getCidHash(cid)}`;
 };
+
+export const fetchJson = async (url: string, options?: RequestInit): Promise<AnyJson | null> => {
+  return fetch(url, options).then((res) => (res.ok ? res.json() : null));
+};
+
+export const getEnumOptions = (api: ApiPromise, typeName: string): string[] => {
+  const { sub } = getTypeDef(api.createType(typeName).toRawType());
+  if (!sub || !Array.isArray(sub)) return [];
+
+  return sub
+    .sort((a, b) => Number(a.index) - Number(b.index))
+    .filter(({ name }) => name && !name.startsWith('__Unused'))
+    .map(({ name }) => name as string);
+};
+
+export class BitFlags<OptionsType> {
+  flags: Map<OptionsType, number>;
+  reverse: boolean;
+
+  // we use the reverse logic for collection and item settings
+  // for roles we use the non-reverse logic
+  static toBitFlag(values: boolean[], reverseLogic = false): number {
+    const bitFlag = values
+      .map((value) => (reverseLogic ? +!value : +value))
+      .reverse()
+      .join('');
+
+    return parseInt(bitFlag, 2);
+  }
+
+  constructor(options: Array<OptionsType>, reverse = false) {
+    this.reverse = reverse;
+    this.flags = options.reduce((memo, value, i) => {
+      memo.set(value, 1 << i);
+      return memo;
+    }, new Map());
+  }
+
+  has(checkFlag: OptionsType, value: number): boolean {
+    if (!this.flags.has(checkFlag)) {
+      throw new Error('Incorrect option provided');
+    }
+
+    const result = (value & Number(this.flags.get(checkFlag))) === this.flags.get(checkFlag);
+    return this.reverse ? !result : result;
+  }
+}

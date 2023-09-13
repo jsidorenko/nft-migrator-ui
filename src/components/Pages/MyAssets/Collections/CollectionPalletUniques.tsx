@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import ActionButton from '@buttons/ActionButton.tsx';
@@ -9,8 +8,8 @@ import ShowImage from '@common/ShowImage.tsx';
 
 import { CollectionMetadata } from '@helpers/interfaces.ts';
 import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
+import { routes } from '@helpers/routes.ts';
 
-// import { routes } from '@helpers/routes.ts';
 import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
 
 const STableImage = styled.td`
@@ -43,14 +42,9 @@ interface CollectionRowProps {
 const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
   const { id, name, description, image, metadata, isMapped } = collection;
   const counter = useCountOwnedNfts(id);
-  /*const navigate = useNavigate();
-
-  const goIntoCollection = () => {
-    navigate(routes.myAssets.nfts(id));
-  };*/
 
   return (
-    <tr /* onClick={goIntoCollection}*/>
+    <tr>
       <STableImage>
         <ShowImage imageCid={image} altText={description} />
       </STableImage>
@@ -63,7 +57,7 @@ const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
         {isMapped ? (
           <ReadyButton className='main-light w-100'>Ready</ReadyButton>
         ) : (
-          <Link to='..' className='w-25'>
+          <Link to={routes.myCollections.cloneCollection(id)} className='w-25'>
             <ActionButton type='button' className='secondary w-100'>
               Clone
             </ActionButton>
