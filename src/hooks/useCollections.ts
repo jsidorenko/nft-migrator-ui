@@ -162,7 +162,7 @@ export const useCollections = () => {
 
             if (ownedCollectionIdsInOtherPallet) {
               otherPalletCollectionsMetadata = await fetchCollectionsMetadata(
-                pallet,
+                otherPallet,
                 ownedCollectionIdsInOtherPallet,
               ).then((data) => {
                 if (!data) return [];
