@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Card } from 'react-bootstrap';
 import { styled } from 'styled-components';
 
-import { getFetchableImageUrl, getFetchableUrl } from '@helpers/utilities.ts';
+import { getFetchableImageUrl } from '@helpers/utilities.ts';
 
 const SImg = styled.div`
   img {

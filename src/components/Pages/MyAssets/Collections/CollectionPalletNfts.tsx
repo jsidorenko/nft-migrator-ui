@@ -35,7 +35,8 @@ interface CollectionRowProps {
 }
 
 const CollectionRow = ({ collection }: CollectionRowProps) => {
-  const { id, name, description, image, isMapped } = collection;
+  const { id, json, isMapped } = collection;
+  const { name, description, image } = json || {};
   const counter = useCountOwnedNfts(id);
   /*const navigate = useNavigate();
 

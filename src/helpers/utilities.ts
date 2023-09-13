@@ -96,7 +96,7 @@ export const alternateBackground = () => {
   return () => document.body.classList.remove(ALTERNATE_BACKGROUND_CLASSNAME);
 };
 
-export const getCidUrl = (cid: string) => {
+export const getCidUrl = (cid: unknown) => {
   if (typeof cid !== 'string' || cid.startsWith('http')) {
     return cid;
   }
@@ -104,8 +104,10 @@ export const getCidUrl = (cid: string) => {
   return `${IPFS_NATIVE_SCHEME}${cid}`;
 };
 
-export const getCidHash = (cid: string) => {
-  if (typeof cid !== 'string' || cid.startsWith('http')) {
+export const getCidHash = (cid: unknown): string => {
+  if (typeof cid !== 'string' || !cid) {
+    return '';
+  } else if (cid.startsWith('http')) {
     return cid;
   }
 
@@ -124,28 +126,40 @@ export const getCidHash = (cid: string) => {
   return cid;
 };
 
-export const getFetchableUrl = (cid: string) => {
-  if (cid.startsWith('http')) {
-    return cid;
+export const getFetchableUrl = (cid: unknown): string => {
+  const cidHash = getCidHash(cid);
+
+  if (!cidHash) {
+    return '';
+  } else if (cidHash.startsWith('http')) {
+    return cidHash;
   }
 
-  return `${IPFS_GATEWAY}${getCidHash(cid)}`;
+  return `${IPFS_GATEWAY}${cidHash}`;
 };
 
-export const getFetchableImageUrl = (cid: string) => {
-  if (cid.startsWith('http')) {
-    return cid;
+export const getFetchableImageUrl = (cid: unknown): string => {
+  const cidHash = getCidHash(cid);
+
+  if (!cidHash) {
+    return '';
+  } else if (cidHash.startsWith('http')) {
+    return cidHash;
   }
 
-  return `${IMAGES_GATEWAY}${getCidHash(cid)}`;
+  return `${IMAGES_GATEWAY}${cidHash}`;
 };
 
-export const getFetchableMetadataUrl = (cid: string) => {
-  if (cid.startsWith('http')) {
-    return cid;
+export const getFetchableMetadataUrl = (cid: unknown): string => {
+  const cidHash = getCidHash(cid);
+
+  if (!cidHash) {
+    return '';
+  } else if (cidHash.startsWith('http')) {
+    return cidHash;
   }
 
-  return `${METADATA_GATEWAY}${getCidHash(cid)}`;
+  return `${METADATA_GATEWAY}${cidHash}`;
 };
 
 export const fetchJson = async (url: string, options?: RequestInit): Promise<AnyJson | null> => {

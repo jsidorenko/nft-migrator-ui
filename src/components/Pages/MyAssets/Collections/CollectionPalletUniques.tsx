@@ -40,7 +40,9 @@ interface CollectionRowProps {
 }
 
 const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
-  const { id, name, description, image, metadata, isMapped } = collection;
+  const { id, json, metadataLink, isMapped } = collection;
+  const { name, description, image } = json || {};
+
   const counter = useCountOwnedNfts(id);
 
   return (
@@ -50,7 +52,7 @@ const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
       </STableImage>
       <td>
         <SName>{name || '- no title -'}</SName>
-        <SMetadata>Metadata: {metadata || '-'}</SMetadata>
+        <SMetadata>Metadata: {metadataLink || '-'}</SMetadata>
         <SCounter>{counter}</SCounter>
       </td>
       <td align='center'>

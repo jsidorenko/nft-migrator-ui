@@ -1,4 +1,5 @@
 import type { PalletNftsCollectionSetting } from '@polkadot/types/lookup';
+import { AnyJson } from '@polkadot/types/types';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,16 +14,10 @@ import {
   CollectionMetadata,
   CollectionMetadataRecordNfts,
   CollectionMetadataRecordUniques,
+  CollectionParsedMetadata,
 } from '@helpers/interfaces.ts';
 import { routes } from '@helpers/routes.ts';
-import {
-  BitFlags,
-  fetchJson,
-  getCidHash,
-  getEnumOptions,
-  getFetchableMetadataUrl,
-  getFetchableUrl,
-} from '@helpers/utilities.ts';
+import { BitFlags, fetchJson, getCidHash, getEnumOptions, getFetchableMetadataUrl } from '@helpers/utilities.ts';
 
 export const useCollections = () => {
   const { api, activeAccount, activeWallet } = useAccounts();
@@ -68,25 +63,78 @@ export const useCollections = () => {
     [api],
   );
 
-  const fetchCollectionsMetadata = useCallback(
-    async (pallet: NFT_PALLETS, collections: string[]) => {
-      if (!api) return;
+  const fetchMetadataFromIpfs = (cid: unknown) => {
+    const url = getFetchableMetadataUrl(cid);
+    if (!url) return null;
 
-      const rawMetadata =
+    return fetchJson(url).then((res: AnyJson | null) => {
+      if (!res || typeof res !== 'object' || Array.isArray(res)) return null;
+
+      res.image = getCidHash(res.image) || undefined;
+      res.name = res.name && typeof res.name === 'string' ? res.name : undefined;
+      res.description = res.description && typeof res.description === 'string' ? res.description : undefined;
+
+      return res as CollectionParsedMetadata;
+    });
+  };
+
+  const fetchCollectionsMetadata = useCallback(
+    async (pallet: NFT_PALLETS, collections: string[]): Promise<Array<CollectionMetadata | null> | null> => {
+      if (!api) return null;
+
+      const records =
         pallet === 'nfts'
           ? await api.query.nfts.collectionMetadataOf.multi(collections)
           : await api.query.uniques.classMetadataOf.multi(collections);
 
-      if (Array.isArray(rawMetadata) && rawMetadata.length > 0) {
-        return rawMetadata.map((data) => {
-          const metadata = data.toPrimitive() as unknown as
-            | CollectionMetadataRecordUniques
-            | CollectionMetadataRecordNfts;
-          return metadata?.data || null;
-        });
+      let results = null;
+      if (Array.isArray(records) && records.length > 0) {
+        results = await Promise.all(
+          records.map(async (rawMetadata, index) => {
+            let metadataIsLocked = false;
+            let attributesAreLocked = false;
+            let metadataLink = '';
+            const collectionId = collections[index];
+
+            if (pallet === 'uniques') {
+              if (rawMetadata.isSome) {
+                const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordUniques;
+                metadataLink = metadataInfo.data;
+                metadataIsLocked = metadataInfo.isFrozen;
+                attributesAreLocked = metadataInfo.isFrozen;
+              }
+            } else {
+              if (rawMetadata.isSome) {
+                const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordNfts;
+                metadataLink = metadataInfo?.data;
+              }
+
+              const config = await getCollectionConfig(collectionId);
+              if (!config?.isSome) {
+                return null;
+              }
+
+              type CollectionSettings = PalletNftsCollectionSetting['type'];
+              const collectionConfig = config.unwrap().toJSON() as unknown as CollectionConfigJson;
+              const options = getEnumOptions(api, 'PalletNftsCollectionSetting') as CollectionSettings[];
+              const settings = new BitFlags<CollectionSettings>(options, true);
+
+              metadataIsLocked = !settings.has('UnlockedMetadata', collectionConfig.settings);
+              attributesAreLocked = !settings.has('UnlockedAttributes', collectionConfig.settings);
+            }
+
+            return {
+              id: collectionId,
+              metadataLink,
+              metadataIsLocked,
+              attributesAreLocked,
+            } as CollectionMetadata;
+          }),
+        );
       }
+      return results;
     },
-    [api],
+    [api, getCollectionConfig],
   );
 
   const getOwnedCollections = useCallback(
@@ -107,42 +155,41 @@ export const useCollections = () => {
 
           const metadataRecords = await fetchCollectionsMetadata(pallet, ownedCollectionIds);
 
-          if (metadataRecords && metadataRecords.length > 0) {
+          if (Array.isArray(metadataRecords) && metadataRecords.length > 0) {
             const otherPallet: NFT_PALLETS = pallet === 'nfts' ? 'uniques' : 'nfts';
             const ownedCollectionIdsInOtherPallet = await getOwnedCollectionIds(otherPallet);
-            const mappedCollections: Map<string, string> = new Map(); // metadata => collection's id (in another pallet)
+            let otherPalletCollectionsMetadata: string[] = [];
 
             if (ownedCollectionIdsInOtherPallet) {
-              await fetchCollectionsMetadata(pallet, ownedCollectionIdsInOtherPallet).then((data) => {
-                if (!data) return;
-                data.forEach((metadata, index) => {
-                  if (metadata) {
-                    mappedCollections.set(metadata, ownedCollectionIdsInOtherPallet[index]);
-                  }
-                });
+              otherPalletCollectionsMetadata = await fetchCollectionsMetadata(
+                pallet,
+                ownedCollectionIdsInOtherPallet,
+              ).then((data) => {
+                if (!data) return [];
+                return data.map((metadata) => metadata?.metadataLink || '');
               });
             }
 
             const fetchCalls = metadataRecords.map((metadata) => {
-              if (!metadata) {
-                return null;
-              }
-              return fetch(getFetchableMetadataUrl(metadata)).then((res) => (res.ok ? res.json() : null));
+              return fetchMetadataFromIpfs(metadata?.metadataLink);
             });
             const fetchedData = await Promise.allSettled(fetchCalls);
 
-            collections = fetchedData.map((result, index) => {
-              const data = result.status === 'fulfilled' ? result.value : null;
-              return {
-                id: ownedCollectionIds[index],
-                name: data?.name,
-                description: data?.description,
-                image: getCidHash(data?.image),
-                metadata: metadataRecords[index] || undefined,
-                isMapped: !!metadataRecords[index] && mappedCollections.has(metadataRecords[index] as string),
-                raw: data ? JSON.stringify(data) : undefined,
-              };
-            });
+            collections = fetchedData
+              .map((result, index) => {
+                if (!metadataRecords[index]) return null;
+                const data = result.status === 'fulfilled' ? result.value : null;
+                const isMapped =
+                  !!metadataRecords[index]?.metadataLink &&
+                  otherPalletCollectionsMetadata.includes(metadataRecords[index]?.metadataLink as string);
+
+                return {
+                  ...metadataRecords[index],
+                  isMapped,
+                  json: data || undefined,
+                };
+              })
+              .filter(Boolean) as CollectionMetadata[];
           }
 
           updateState(collections);
@@ -164,56 +211,17 @@ export const useCollections = () => {
         setIsCollectionMetadataLoading(true);
 
         try {
-          let metadata: CollectionMetadata | null = null;
+          const metadata = await fetchCollectionsMetadata(pallet, [collectionId]);
 
-          const rawMetadata =
-            pallet === 'nfts'
-              ? await api.query.nfts.collectionMetadataOf(collectionId)
-              : await api.query.uniques.classMetadataOf(collectionId);
-
-          if (rawMetadata) {
-            let metadataIsLocked = true;
-            let attributesAreLocked = true;
-            let metadataLink;
-
-            if (pallet === 'uniques') {
-              const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordUniques;
-              metadataLink = metadataInfo.data;
-              metadataIsLocked = metadataInfo.isFrozen;
-              attributesAreLocked = metadataInfo.isFrozen;
-            } else {
-              const metadataInfo = rawMetadata.toPrimitive() as unknown as CollectionMetadataRecordNfts;
-              metadataLink = metadataInfo.data;
-
-              const config = await getCollectionConfig(collectionId);
-              if (!config || !config.isSome) {
-                throw new Error('Collection`s config not found');
-              }
-
-              type CollectionSettings = PalletNftsCollectionSetting['type'];
-              const collectionConfig = config.unwrap().toJSON() as unknown as CollectionConfigJson;
-              const options = getEnumOptions(api, 'PalletNftsCollectionSetting') as CollectionSettings[];
-              const settings = new BitFlags<CollectionSettings>(options, true);
-
-              metadataIsLocked = !settings.has('UnlockedMetadata', collectionConfig.settings);
-              attributesAreLocked = !settings.has('UnlockedAttributes', collectionConfig.settings);
+          if (metadata && metadata[0]) {
+            const fetchedData = await fetchMetadataFromIpfs(metadata[0].metadataLink);
+            if (fetchedData) {
+              metadata[0].json = fetchedData;
             }
-
-            let fetchedData = null;
-            if (metadataLink) {
-              fetchedData = await fetchJson(getFetchableUrl(metadataLink));
-            }
-
-            metadata = {
-              id: collectionId,
-              metadataLink,
-              metadataIsLocked,
-              attributesAreLocked,
-              json: fetchedData || undefined,
-            };
+            updateState(metadata[0]);
+          } else {
+            updateState(null);
           }
-
-          updateState(metadata);
         } catch (error) {
           updateState(null);
         } finally {
@@ -223,7 +231,7 @@ export const useCollections = () => {
         updateState(null);
       }
     },
-    [api, getCollectionConfig],
+    [api, fetchCollectionsMetadata],
   );
 
   const finishCollectionCreation = useCallback(

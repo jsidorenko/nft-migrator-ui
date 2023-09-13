@@ -1,5 +1,3 @@
-import { AnyJson } from '@polkadot/types/types';
-
 import {
   ChainThemes,
   ChainTitles,
@@ -24,9 +22,15 @@ export interface CollectionMetadata {
   id: string;
   metadataLink: string;
   isMapped?: boolean;
-  json?: AnyJson;
+  json?: CollectionParsedMetadata;
   metadataIsLocked: boolean;
   attributesAreLocked: boolean;
+}
+
+export interface CollectionParsedMetadata {
+  name?: string;
+  description?: string;
+  image?: string;
 }
 
 // TODO: remove
