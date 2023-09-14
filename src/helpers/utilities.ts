@@ -166,6 +166,10 @@ export const fetchJson = async (url: string, options?: RequestInit): Promise<Any
   return fetch(url, options).then((res) => (res.ok ? res.json() : null));
 };
 
+export const stringOrNothing = (value: unknown): string | undefined => {
+  return typeof value === 'string' ? value : undefined;
+};
+
 export const getEnumOptions = (api: ApiPromise, typeName: string): string[] => {
   const { sub } = getTypeDef(api.createType(typeName).toRawType());
   if (!sub || !Array.isArray(sub)) return [];

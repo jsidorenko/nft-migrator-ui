@@ -17,7 +17,14 @@ import {
   CollectionParsedMetadata,
 } from '@helpers/interfaces.ts';
 import { routes } from '@helpers/routes.ts';
-import { BitFlags, fetchJson, getCidHash, getEnumOptions, getFetchableMetadataUrl } from '@helpers/utilities.ts';
+import {
+  BitFlags,
+  fetchJson,
+  getCidHash,
+  getEnumOptions,
+  getFetchableMetadataUrl,
+  stringOrNothing,
+} from '@helpers/utilities.ts';
 
 export const useCollections = () => {
   const { api, activeAccount, activeWallet } = useAccounts();
@@ -71,8 +78,8 @@ export const useCollections = () => {
       if (!res || typeof res !== 'object' || Array.isArray(res)) return null;
 
       res.image = getCidHash(res.image) || undefined;
-      res.name = res.name && typeof res.name === 'string' ? res.name : undefined;
-      res.description = res.description && typeof res.description === 'string' ? res.description : undefined;
+      res.name = stringOrNothing(res.name);
+      res.description = stringOrNothing(res.description);
 
       return res as CollectionParsedMetadata;
     });
