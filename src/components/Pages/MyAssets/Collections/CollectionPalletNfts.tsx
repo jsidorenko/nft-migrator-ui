@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import ActionButton from '@buttons/ActionButton.tsx';
@@ -10,7 +9,6 @@ import ShowImage from '@common/ShowImage.tsx';
 import { CollectionMetadata } from '@helpers/interfaces.ts';
 import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 
-// import { routes } from '@helpers/routes.ts';
 import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
 
 import LockIcon from '@images/icons/lock.svg';
@@ -34,20 +32,16 @@ const SCounter = styled.div`
 
 interface CollectionRowProps {
   collection: CollectionMetadata;
+  onChangeTeam: () => void;
 }
 
-const CollectionRow = ({ collection }: CollectionRowProps) => {
+const CollectionRow = ({ collection, onChangeTeam }: CollectionRowProps) => {
   const { id, json, isMapped, attributesAreLocked } = collection;
   const { name, image } = json || {};
   const counter = useCountOwnedNfts(id);
-  /*const navigate = useNavigate();
-
-  const goIntoCollection = () => {
-    navigate(routes.myAssets.nfts(id));
-  };*/
 
   return (
-    <tr /* onClick={goIntoCollection}*/>
+    <tr>
       <STableImage>
         <ShowImage imageCid={image} altText='' />
       </STableImage>
@@ -59,11 +53,9 @@ const CollectionRow = ({ collection }: CollectionRowProps) => {
         <SCounter>{counter}</SCounter>
       </td>
       <td align='center' className='w-25'>
-        <Link to='..'>
-          <ActionButton type='button' className='stroke w-100'>
-            Change team
-          </ActionButton>
-        </Link>
+        <ActionButton type='button' className='stroke w-100' action={onChangeTeam}>
+          Change admin
+        </ActionButton>
       </td>
       <td align='right' className='w-25'>
         <Link to='..'>

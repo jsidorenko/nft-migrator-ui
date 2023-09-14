@@ -106,7 +106,12 @@ const CreateCollection = () => {
           },
         };
 
-        createCollection(collectionConfig, collectionUniquesMetadata.metadataLink, settingsAfter);
+        createCollection(
+          collectionConfig,
+          collectionUniquesMetadata.metadataLink,
+          collectionAdminRef.current.value,
+          settingsAfter,
+        );
       }
     },
     [api, createCollection, collectionUniquesMetadata],

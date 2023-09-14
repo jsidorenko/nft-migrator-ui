@@ -46,6 +46,8 @@ export enum StatusMessages {
   NFT_MINTING = 'Minting NFT, please wait',
   TRANSACTION_CANCELED = 'Transaction was canceled',
   TRANSACTION_CONFIRM = 'Please confirm transaction in your wallet',
+  UPDATING_TEAM = 'Updating team, please wait',
+  TEAM_UPDATED = 'Team updated!',
 }
 
 export enum MintTypes {

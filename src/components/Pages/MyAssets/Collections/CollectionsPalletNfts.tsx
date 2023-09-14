@@ -1,14 +1,17 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import ModalStatus from '@common/ModalStatus.tsx';
 import Title from '@common/Title.tsx';
 
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
 import { useLoadOwnedNftsCollections } from '@hooks/useLoadCollectionsData.ts';
+
+import EditTeamModal from '@modals/EditTeamModal/EditTeamModal.tsx';
 
 import CollectionPalletNfts from './CollectionPalletNfts.tsx';
 
@@ -24,13 +27,13 @@ const RulesBlock = styled(Card)`
 `;
 
 const RuleTitle = styled.div`
-  ${CssFontRegularM}
+  ${CssFontRegularM};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
 
 const RuleSteps = styled.div`
   padding-left: 10px;
-  ${CssFontRegularS}
+  ${CssFontRegularS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
 
@@ -49,10 +52,22 @@ const PalletSelector = styled.div`
 `;
 
 const CollectionsPalletNfts = () => {
+  const [isEditTeamModalVisible, setIsEditTeamModalVisible] = useState(false);
+  const [editTeamCollectionId, setEditTeamCollectionId] = useState<string>();
   const collections = useLoadOwnedNftsCollections();
+
+  const handleEditTeamModalClose = () => setIsEditTeamModalVisible(false);
+  const handleShowEditTeamModal = (collectionId: string) => {
+    setEditTeamCollectionId(collectionId);
+    setIsEditTeamModalVisible(true);
+  };
 
   return (
     <>
+      {isEditTeamModalVisible && editTeamCollectionId && (
+        <EditTeamModal onFormClose={handleEditTeamModalClose} collectionId={editTeamCollectionId} />
+      )}
+      <ModalStatus />
       <Title className='main no-margin'>
         <>
           <PalletSelector>
@@ -82,7 +97,11 @@ const CollectionsPalletNfts = () => {
           <STable>
             <tbody>
               {collections.map((collection) => (
-                <CollectionPalletNfts key={collection.id} collection={collection} />
+                <CollectionPalletNfts
+                  key={collection.id}
+                  collection={collection}
+                  onChangeTeam={() => handleShowEditTeamModal(collection.id)}
+                />
               ))}
             </tbody>
           </STable>

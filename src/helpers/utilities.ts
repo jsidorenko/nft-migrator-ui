@@ -208,7 +208,7 @@ export class BitFlags<OptionsType> {
       throw new Error('Incorrect option provided');
     }
 
-    const result = (value & Number(this.flags.get(checkFlag))) === this.flags.get(checkFlag);
+    const result = (value & (this.flags.get(checkFlag) as number)) === this.flags.get(checkFlag);
     return this.reverse ? !result : result;
   }
 }

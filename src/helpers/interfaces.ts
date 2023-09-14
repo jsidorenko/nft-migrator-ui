@@ -18,6 +18,7 @@ export interface CommonStyleProps {
   required?: boolean;
   title?: string;
 }
+
 export interface CollectionMetadata {
   id: string;
   metadataLink: string;
@@ -51,6 +52,7 @@ export interface CollectionMetadataRecordUniques {
   isFrozen: boolean;
 }
 
+// TODO: review
 export interface CollectionConfig {
   settings: number;
   maxSupply?: number;
@@ -63,6 +65,7 @@ export interface CollectionConfig {
   };
 }
 
+// TODO: review
 export interface CollectionConfigJson {
   settings: number;
   maxSupply: number | null;
@@ -73,6 +76,12 @@ export interface CollectionConfigJson {
     endBlock: number | null;
     defaultItemSettings: number;
   };
+}
+
+export interface CollectionRoles {
+  admin?: string;
+  issuer?: string;
+  freezer?: string;
 }
 
 export interface NftMetadata extends NftMetadataData {

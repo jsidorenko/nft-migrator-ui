@@ -1,4 +1,4 @@
-import type { PalletNftsCollectionSetting } from '@polkadot/types/lookup';
+import type { PalletNftsCollectionRole, PalletNftsCollectionSetting } from '@polkadot/types/lookup';
 import { AnyJson } from '@polkadot/types/types';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ import {
   CollectionMetadataRecordNfts,
   CollectionMetadataRecordUniques,
   CollectionParsedMetadata,
+  CollectionRoles,
 } from '@helpers/interfaces.ts';
 import { routes } from '@helpers/routes.ts';
 import {
@@ -34,6 +35,8 @@ export const useCollections = () => {
   const [ownedUniquesCollections, setOwnedUniquesCollections] = useState<CollectionMetadata[] | null>(null);
   const [collectionNftsMetadata, setCollectionNftsMetadata] = useState<CollectionMetadata | null>(null);
   const [collectionUniquesMetadata, setCollectionUniquesMetadata] = useState<CollectionMetadata | null>(null);
+  const [collectionNftsRoles, setCollectionNftsRoles] = useState<CollectionRoles | null>(null);
+  const [collectionUniquesRoles, setCollectionUniquesRoles] = useState<CollectionRoles | null>(null);
   const [isCollectionMetadataLoading, setIsCollectionMetadataLoading] = useState(false);
 
   const getOwnedCollectionIds = useCallback(
@@ -241,6 +244,71 @@ export const useCollections = () => {
     [api, fetchCollectionsMetadata],
   );
 
+  const getCollectionRoles = useCallback(
+    async (collectionId: string, pallet: NFT_PALLETS) => {
+      const updateState = pallet === 'nfts' ? setCollectionNftsRoles : setCollectionUniquesRoles;
+      let result: CollectionRoles | null = null;
+
+      updateState(result);
+
+      if (api && collectionId) {
+        try {
+          switch (pallet) {
+            case 'uniques': {
+              const collection = await api.query.uniques.class(collectionId);
+              if (collection.isSome) {
+                const roles = collection.unwrap();
+                result = {};
+                result.admin = roles.admin.toString();
+                result.issuer = roles.issuer.toString();
+                result.freezer = roles.freezer.toString();
+              }
+              break;
+            }
+            case 'nfts': {
+              const results = await api.query.nfts.collectionRoleOf.entries(collectionId);
+              const collectionRoles = results.map(
+                ([
+                  {
+                    args: [, account],
+                  },
+                  data,
+                ]) => ({
+                  account: account.toString(),
+                  roles: data.unwrapOrDefault().toNumber(),
+                }),
+              );
+              result = {};
+              if (collectionRoles.length) {
+                type CollectionRole = PalletNftsCollectionRole['type'];
+                const rolesBitflags = new BitFlags<CollectionRole>(
+                  getEnumOptions(api, 'PalletNftsCollectionRole') as CollectionRole[],
+                );
+
+                for (const record of collectionRoles) {
+                  if (rolesBitflags.has('Admin', record.roles)) {
+                    result.admin = record.account;
+                  }
+                  if (rolesBitflags.has('Issuer', record.roles)) {
+                    result.issuer = record.account;
+                  }
+                  if (rolesBitflags.has('Freezer', record.roles)) {
+                    result.freezer = record.account;
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          //
+        }
+
+        updateState(result);
+      }
+    },
+    [api],
+  );
+
   const finishCollectionCreation = useCallback(
     async (collectionId: string, collectionMetadata: string, newCollectionSettings: number | null) => {
       if (api && activeAccount && activeWallet) {
@@ -295,14 +363,19 @@ export const useCollections = () => {
   );
 
   const createCollection = useCallback(
-    async (collectionConfig: CollectionConfig, collectionMetadata: string, settingsAfter: number | null) => {
+    async (
+      collectionConfig: CollectionConfig,
+      collectionMetadata: string,
+      admin: string,
+      settingsAfter: number | null,
+    ) => {
       if (api && activeAccount && activeWallet) {
         setStatus({ type: ModalStatusTypes.INIT_TRANSACTION, message: StatusMessages.TRANSACTION_CONFIRM });
         openModalStatus();
 
         try {
           const unsub = await api.tx.nfts
-            .create(activeAccount.address, collectionConfig)
+            .create(admin, collectionConfig)
             .signAndSend(activeAccount.address, { signer: activeWallet.signer }, ({ events, status }) => {
               if (status.isReady) {
                 setStatus({ type: ModalStatusTypes.IN_PROGRESS, message: StatusMessages.COLLECTION_CREATING });
@@ -337,27 +410,77 @@ export const useCollections = () => {
     [api, activeAccount, activeWallet, setStatus, openModalStatus, finishCollectionCreation],
   );
 
+  const updateTeam = useCallback(
+    async (pallet: NFT_PALLETS, collectionId: string, team: CollectionRoles) => {
+      if (api && activeAccount && activeWallet) {
+        setStatus({ type: ModalStatusTypes.INIT_TRANSACTION, message: StatusMessages.TRANSACTION_CONFIRM });
+        openModalStatus();
+
+        let tx;
+        switch (pallet) {
+          case 'nfts':
+            tx = api.tx.nfts.setTeam(collectionId, team.issuer || null, team.admin || null, team.freezer || null);
+            break;
+
+          case 'uniques':
+            tx = api.tx.uniques.setTeam(collectionId, team.issuer || '', team.admin || '', team.freezer || '');
+        }
+
+        try {
+          const unsub = await tx.signAndSend(
+            activeAccount.address,
+            { signer: activeWallet.signer },
+            ({ events, status }) => {
+              if (status.isReady) {
+                setStatus({ type: ModalStatusTypes.IN_PROGRESS, message: StatusMessages.UPDATING_TEAM });
+              }
+
+              if (status.isInBlock) {
+                unsub();
+                events.some(({ event: { method } }) => {
+                  if (method === 'TeamChanged') {
+                    setStatus({ type: ModalStatusTypes.COMPLETE, message: StatusMessages.TEAM_UPDATED });
+                    return true;
+                  }
+
+                  if (method === 'ExtrinsicFailed') {
+                    setStatus({ type: ModalStatusTypes.ERROR, message: StatusMessages.ACTION_FAILED });
+
+                    return true;
+                  }
+
+                  return false;
+                });
+              }
+            },
+          );
+        } catch (error) {
+          setStatus({ type: ModalStatusTypes.ERROR, message: handleError(error) });
+        }
+      }
+    },
+    [api, activeAccount, activeWallet, setStatus, openModalStatus],
+  );
+
   const validateOwnedCollection = useCallback(
     async (collectionId: string, pallet: NFT_PALLETS) => {
       let result = false;
       if (api && activeAccount) {
         switch (pallet) {
-          case 'nfts':
-            {
-              const collection = await api.query.nfts.collection(collectionId);
-              if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
-                result = true;
-              }
+          case 'nfts': {
+            const collection = await api.query.nfts.collection(collectionId);
+            if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
+              result = true;
             }
             break;
-          case 'uniques':
-            {
-              const collection = await api.query.uniques.class(collectionId);
-              if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
-                result = true;
-              }
+          }
+          case 'uniques': {
+            const collection = await api.query.uniques.class(collectionId);
+            if (collection.isSome && collection.unwrap().owner.eq(activeAccount.address)) {
+              result = true;
             }
             break;
+          }
         }
       }
 
@@ -369,6 +492,7 @@ export const useCollections = () => {
   return {
     getOwnedCollections,
     getCollectionMetadata,
+    getCollectionRoles,
     createCollection,
     ownedNftsCollections,
     ownedUniquesCollections,
@@ -377,5 +501,8 @@ export const useCollections = () => {
     isCollectionMetadataLoading,
     getCollectionConfig,
     validateOwnedCollection,
+    collectionNftsRoles,
+    collectionUniquesRoles,
+    updateTeam,
   };
 };
