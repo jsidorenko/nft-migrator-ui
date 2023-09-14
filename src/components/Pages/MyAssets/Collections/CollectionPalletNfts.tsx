@@ -13,6 +13,8 @@ import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/re
 // import { routes } from '@helpers/routes.ts';
 import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
 
+import LockIcon from '@images/icons/lock.svg';
+
 const STableImage = styled.td`
   width: 100px;
 `;
@@ -35,8 +37,8 @@ interface CollectionRowProps {
 }
 
 const CollectionRow = ({ collection }: CollectionRowProps) => {
-  const { id, json, isMapped } = collection;
-  const { name, description, image } = json || {};
+  const { id, json, isMapped, attributesAreLocked } = collection;
+  const { name, image } = json || {};
   const counter = useCountOwnedNfts(id);
   /*const navigate = useNavigate();
 
@@ -47,7 +49,7 @@ const CollectionRow = ({ collection }: CollectionRowProps) => {
   return (
     <tr /* onClick={goIntoCollection}*/>
       <STableImage>
-        <ShowImage imageCid={image} altText={description} />
+        <ShowImage imageCid={image} altText='' />
       </STableImage>
       <td>
         <SName>{name || '- no title -'}</SName>
@@ -66,7 +68,10 @@ const CollectionRow = ({ collection }: CollectionRowProps) => {
       <td align='right' className='w-25'>
         <Link to='..'>
           <ActionButton type='button' className='stroke w-100'>
-            Attach snapshot
+            <span>
+              {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
+              Attach snapshot
+            </span>
           </ActionButton>
         </Link>
       </td>

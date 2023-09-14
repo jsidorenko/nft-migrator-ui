@@ -12,6 +12,8 @@ import { routes } from '@helpers/routes.ts';
 
 import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
 
+import LockIcon from '@images/icons/lock.svg';
+
 const STableImage = styled.td`
   width: 100px;
 `;
@@ -23,6 +25,8 @@ const SName = styled.div`
 const SMetadata = styled.div`
   ${CssFontRegularXS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
+  max-width: 600px;
+  overflow: auto;
 `;
 
 const SCounter = styled.div`
@@ -40,15 +44,15 @@ interface CollectionRowProps {
 }
 
 const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
-  const { id, json, metadataLink, isMapped } = collection;
-  const { name, description, image } = json || {};
+  const { id, json, metadataLink, isMapped, attributesAreLocked } = collection;
+  const { name, image } = json || {};
 
   const counter = useCountOwnedNfts(id);
 
   return (
     <tr>
       <STableImage>
-        <ShowImage imageCid={image} altText={description} />
+        <ShowImage imageCid={image} altText='' />
       </STableImage>
       <td>
         <SName>{name || '- no title -'}</SName>
@@ -69,7 +73,10 @@ const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
       <td align='right'>
         <Link to='..' className='w-25'>
           <ActionButton type='button' className='stroke w-100'>
-            Attach snapshot
+            <span>
+              {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
+              Attach snapshot
+            </span>
           </ActionButton>
         </Link>
       </td>
