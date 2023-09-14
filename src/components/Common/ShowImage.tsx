@@ -28,7 +28,9 @@ const ShowImage = ({ imageCid, altText }: ShowImageProps) => {
 
   return (
     <SImg>
-      <Card.Img src={getFetchableImageUrl(imageCid)} alt={altText} />
+      <a href={getFetchableImageUrl(imageCid)} target='_blank' rel='noreferrer'>
+        <Card.Img src={getFetchableImageUrl(imageCid)} alt={altText} />
+      </a>
     </SImg>
   );
 };
