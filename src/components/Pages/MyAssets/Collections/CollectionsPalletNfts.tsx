@@ -6,11 +6,13 @@ import { styled } from 'styled-components';
 import ModalStatus from '@common/ModalStatus.tsx';
 import Title from '@common/Title.tsx';
 
+import type { AttachAttributesModalData } from '@helpers/interfaces.ts';
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
 import { useLoadOwnedNftsCollections } from '@hooks/useLoadCollectionsData.ts';
 
+import AttachAttributesModal from '@modals/AttachAttributesModal/AttachAttributesModal.tsx';
 import EditTeamModal from '@modals/EditTeamModal/EditTeamModal.tsx';
 
 import CollectionPalletNfts from './CollectionPalletNfts.tsx';
@@ -54,6 +56,8 @@ const PalletSelector = styled.div`
 const CollectionsPalletNfts = () => {
   const [isEditTeamModalVisible, setIsEditTeamModalVisible] = useState(false);
   const [editTeamCollectionId, setEditTeamCollectionId] = useState<string>();
+  const [isAttachAttributesModalVisible, setIsAttachAttributesModalVisible] = useState(false);
+  const [attachAttributesModalData, setAttachAttributesModalData] = useState<AttachAttributesModalData>();
   const collections = useLoadOwnedNftsCollections();
 
   const handleEditTeamModalClose = () => setIsEditTeamModalVisible(false);
@@ -62,10 +66,24 @@ const CollectionsPalletNfts = () => {
     setIsEditTeamModalVisible(true);
   };
 
+  const handleAttachAttributesModalClose = () => setIsAttachAttributesModalVisible(false);
+  const handleAttachAttributesModal = (collectionId: string, attributesAreLocked: boolean) => {
+    setAttachAttributesModalData({ collectionId, attributesAreLocked });
+    setIsAttachAttributesModalVisible(true);
+  };
+
   return (
     <>
       {isEditTeamModalVisible && editTeamCollectionId && (
         <EditTeamModal onFormClose={handleEditTeamModalClose} collectionId={editTeamCollectionId} />
+      )}
+      {isAttachAttributesModalVisible && attachAttributesModalData && (
+        <AttachAttributesModal
+          onFormClose={handleAttachAttributesModalClose}
+          collectionId={attachAttributesModalData.collectionId}
+          attributesAreLocked={attachAttributesModalData.attributesAreLocked}
+          pallet='nfts'
+        />
       )}
       <ModalStatus />
       <Title className='main no-margin'>
@@ -101,6 +119,7 @@ const CollectionsPalletNfts = () => {
                   key={collection.id}
                   collection={collection}
                   onChangeTeam={() => handleShowEditTeamModal(collection.id)}
+                  onAttachAttributes={() => handleAttachAttributesModal(collection.id, collection.attributesAreLocked)}
                 />
               ))}
             </tbody>

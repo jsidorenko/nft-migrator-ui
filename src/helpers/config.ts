@@ -48,6 +48,8 @@ export enum StatusMessages {
   TRANSACTION_CONFIRM = 'Please confirm transaction in your wallet',
   UPDATING_TEAM = 'Updating team, please wait',
   TEAM_UPDATED = 'Team updated!',
+  UPDATING_ATTRIBUTES = 'Updating attributes, please wait',
+  SNAPSHOT_ATTACHED = 'Snapshot attached!',
 }
 
 export enum MintTypes {
@@ -71,6 +73,11 @@ export enum ExtensionIds {
 export enum ViewAsOptions {
   CARDS = 'cards',
   TABLE = 'table',
+}
+
+export enum SUPPORTED_ATTRIBUTE_KEYS {
+  SNAPSHOT = 'offchain-mint-snapshot',
+  PROVIDER = 'offchain-mint-ipfs-provider',
 }
 
 export type NFT_PALLETS = 'nfts' | 'uniques';

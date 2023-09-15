@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import ActionButton from '@buttons/ActionButton.tsx';
@@ -30,12 +29,13 @@ const SCounter = styled.div`
   ${CssFontRegularS};
 `;
 
-interface CollectionRowProps {
+interface CollectionPalletNftsProps {
   collection: CollectionMetadata;
   onChangeTeam: () => void;
+  onAttachAttributes: () => void;
 }
 
-const CollectionRow = ({ collection, onChangeTeam }: CollectionRowProps) => {
+const CollectionPalletNfts = ({ collection, onChangeTeam, onAttachAttributes }: CollectionPalletNftsProps) => {
   const { id, json, isMapped, attributesAreLocked } = collection;
   const { name, image } = json || {};
   const counter = useCountOwnedNfts(id);
@@ -58,17 +58,15 @@ const CollectionRow = ({ collection, onChangeTeam }: CollectionRowProps) => {
         </ActionButton>
       </td>
       <td align='right' className='w-25'>
-        <Link to='..'>
-          <ActionButton type='button' className='stroke w-100'>
-            <span>
-              {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
-              Attach snapshot
-            </span>
-          </ActionButton>
-        </Link>
+        <ActionButton type='button' className='stroke w-100' action={onAttachAttributes}>
+          <span>
+            {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
+            Attach snapshot
+          </span>
+        </ActionButton>
       </td>
     </tr>
   );
 };
 
-export default memo(CollectionRow);
+export default memo(CollectionPalletNfts);

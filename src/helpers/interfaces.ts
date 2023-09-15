@@ -84,6 +84,18 @@ export interface CollectionRoles {
   freezer?: string;
 }
 
+export type CollectionAttribute = Record<string, string>;
+
+export interface CollectionSnapshot {
+  link?: string;
+  provider?: string;
+}
+
+export interface AttachAttributesModalData {
+  collectionId: string;
+  attributesAreLocked: boolean;
+}
+
 export interface NftMetadata extends NftMetadataData {
   id: string;
 }

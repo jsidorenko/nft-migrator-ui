@@ -1,14 +1,18 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import ModalStatus from '@common/ModalStatus.tsx';
 import Title from '@common/Title.tsx';
 
+import type { AttachAttributesModalData } from '@helpers/interfaces.ts';
 import { CssFontRegularM, CssFontRegularS, SContentBlockContainer } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
 import { useLoadOwnedUniquesCollections } from '@hooks/useLoadCollectionsData.ts';
+
+import AttachAttributesModal from '@modals/AttachAttributesModal/AttachAttributesModal.tsx';
 
 import CollectionPalletUniques from './CollectionPalletUniques.tsx';
 
@@ -24,13 +28,13 @@ const RulesBlock = styled(Card)`
 `;
 
 const RuleTitle = styled.div`
-  ${CssFontRegularM}
+  ${CssFontRegularM};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
 
 const RuleSteps = styled.div`
   padding-left: 10px;
-  ${CssFontRegularS}
+  ${CssFontRegularS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
 
@@ -49,10 +53,26 @@ const PalletSelector = styled.div`
 `;
 
 const CollectionsPalletUniques = () => {
+  const [isAttachAttributesModalVisible, setIsAttachAttributesModalVisible] = useState(false);
+  const [attachAttributesModalData, setAttachAttributesModalData] = useState<AttachAttributesModalData>();
   const collections = useLoadOwnedUniquesCollections();
 
+  const handleAttachAttributesModalClose = () => setIsAttachAttributesModalVisible(false);
+  const handleAttachAttributesModal = (collectionId: string, attributesAreLocked: boolean) => {
+    setAttachAttributesModalData({ collectionId, attributesAreLocked });
+    setIsAttachAttributesModalVisible(true);
+  };
   return (
     <>
+      {isAttachAttributesModalVisible && attachAttributesModalData && (
+        <AttachAttributesModal
+          onFormClose={handleAttachAttributesModalClose}
+          collectionId={attachAttributesModalData.collectionId}
+          attributesAreLocked={attachAttributesModalData.attributesAreLocked}
+          pallet='uniques'
+        />
+      )}
+      <ModalStatus />
       <Title className='main no-margin'>
         <>
           <PalletSelector>
@@ -84,7 +104,11 @@ const CollectionsPalletUniques = () => {
           <STable>
             <tbody>
               {collections.map((collection) => (
-                <CollectionPalletUniques key={collection.id} collection={collection} />
+                <CollectionPalletUniques
+                  key={collection.id}
+                  collection={collection}
+                  onAttachAttributes={() => handleAttachAttributesModal(collection.id, collection.attributesAreLocked)}
+                />
               ))}
             </tbody>
           </STable>

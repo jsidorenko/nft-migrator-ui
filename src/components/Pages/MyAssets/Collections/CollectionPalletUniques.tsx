@@ -39,11 +39,12 @@ const ReadyButton = styled(ActionButton)`
   }
 `;
 
-interface CollectionRowProps {
+interface CollectionPalletUniquesProps {
   collection: CollectionMetadata;
+  onAttachAttributes: () => void;
 }
 
-const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
+const CollectionPalletUniques = ({ collection, onAttachAttributes }: CollectionPalletUniquesProps) => {
   const { id, json, metadataLink, isMapped, attributesAreLocked } = collection;
   const { name, image } = json || {};
 
@@ -71,14 +72,12 @@ const CollectionPalletUniques = ({ collection }: CollectionRowProps) => {
         )}
       </td>
       <td align='right'>
-        <Link to='..' className='w-25'>
-          <ActionButton type='button' className='stroke w-100'>
-            <span>
-              {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
-              Attach snapshot
-            </span>
-          </ActionButton>
-        </Link>
+        <ActionButton type='button' className='stroke w-100' action={onAttachAttributes}>
+          <span>
+            {attributesAreLocked && <LockIcon className='me-lg-1 mb-1' />}
+            Attach snapshot
+          </span>
+        </ActionButton>
       </td>
     </tr>
   );

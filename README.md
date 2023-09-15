@@ -32,7 +32,7 @@ TODO:
   - [X] my collections in the uniques pallet (change the title to represent the pallet)
   - [X] icon if the collection is migrated (find the same collection by the same owner)
   - [X] button to migrate (clone to pallet-nfts)
-  - [ ] attach a snapshot
+  - [X] attach a snapshot
   - [X] show metadata
   - [X] collections in the nfts pallet
   - [X] create new collection page (read src_collection param), for metadata just leave an input field
