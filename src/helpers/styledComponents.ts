@@ -2,7 +2,7 @@
 import { Card, Form, FormGroup, FormLabel, Modal } from 'react-bootstrap';
 import { styled } from 'styled-components';
 
-import { CssFormControl, mediaQueries } from './reusableStyles.ts';
+import { CssFontRegularS, CssFormControl, mediaQueries } from './reusableStyles.ts';
 
 export const SCard = styled(Card)`
   width: 360px;
@@ -122,4 +122,12 @@ export const SImageSelection = styled(SGroup)`
   @media ${mediaQueries.tablet} {
     display: none;
   }
+`;
+
+export const SNote = styled.div`
+  margin: -14px 0 24px;
+  ${CssFontRegularS};
+  background-color: rgb(255, 248, 197);
+  padding: 10px 15px;
+  color: ${({ theme }) => theme.textAndIconsSecondary};
 `;

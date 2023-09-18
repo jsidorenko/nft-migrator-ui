@@ -54,7 +54,7 @@ export const useCollections = () => {
 
         const collectionIds = results
           .map(({ args: [, collectionId] }) => collectionId)
-          .sort((a, b) => a.cmp(b))
+          .sort((a, b) => a.cmp(b) * -1)
           .map((collectionId) => collectionId.toString());
 
         if (collectionIds.length > 0) {
@@ -555,12 +555,32 @@ export const useCollections = () => {
   };
 
   const attachSnapshot = useCallback(
-    async (pallet: NFT_PALLETS, collectionId: string, newValues: CollectionSnapshot, oldValues: CollectionSnapshot) => {
+    async (
+      pallet: NFT_PALLETS,
+      collectionId: string,
+      newValues: CollectionSnapshot,
+      oldValues: CollectionSnapshot,
+      collectionRoles: CollectionRoles,
+    ) => {
       if (api && activeAccount && activeWallet) {
         setStatus({ type: ModalStatusTypes.INIT_TRANSACTION, message: StatusMessages.TRANSACTION_CONFIRM });
         openModalStatus();
 
         const txs = [];
+
+        // in the pallet-nfts in order to update the attributes you need to have an Admin role
+        const needToChangeRole = activeAccount.address !== collectionRoles.admin && pallet === 'nfts';
+        if (needToChangeRole) {
+          txs.push(
+            api.tx.nfts.setTeam(
+              collectionId,
+              collectionRoles.issuer || null,
+              activeAccount.address,
+              collectionRoles.freezer || null,
+            ),
+          );
+        }
+
         if (newValues.link) {
           txs.push(addAttributeTx(api, pallet, collectionId, SUPPORTED_ATTRIBUTE_KEYS.SNAPSHOT, newValues.link));
         } else if (oldValues.link) {
@@ -570,6 +590,17 @@ export const useCollections = () => {
           txs.push(addAttributeTx(api, pallet, collectionId, SUPPORTED_ATTRIBUTE_KEYS.PROVIDER, newValues.provider));
         } else if (oldValues.provider) {
           txs.push(removeAttributeTx(api, pallet, collectionId, SUPPORTED_ATTRIBUTE_KEYS.PROVIDER));
+        }
+
+        if (needToChangeRole) {
+          txs.push(
+            api.tx.nfts.setTeam(
+              collectionId,
+              collectionRoles.issuer || null,
+              collectionRoles.admin || null,
+              collectionRoles.freezer || null,
+            ),
+          );
         }
 
         try {

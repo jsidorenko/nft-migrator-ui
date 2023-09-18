@@ -1,12 +1,11 @@
 import { FormEvent, memo, useCallback, useEffect, useRef } from 'react';
 import { FormControl, Modal, Stack } from 'react-bootstrap';
-import { styled } from 'styled-components';
 
 import ActionButton from '@buttons/ActionButton.tsx';
 
 import { CollectionRoles } from '@helpers/interfaces.ts';
-import { CssFontRegularS, SFormBlock, SPageControls } from '@helpers/reusableStyles.ts';
-import { SFormLayout, SGroup, SLabel, SModal } from '@helpers/styledComponents.ts';
+import { SFormBlock, SPageControls } from '@helpers/reusableStyles.ts';
+import { SFormLayout, SGroup, SLabel, SModal, SNote } from '@helpers/styledComponents.ts';
 
 import { useCollections } from '@hooks/useCollections.ts';
 
@@ -14,14 +13,6 @@ interface ConnectModalProps {
   collectionId: string;
   onFormClose: () => void;
 }
-
-const Note = styled.div`
-  margin: -14px 0 24px;
-  ${CssFontRegularS};
-  background-color: rgb(255, 248, 197);
-  padding: 10px 15px;
-  color: ${({ theme }) => theme.textAndIconsSecondary};
-`;
 
 const EditTeamModal = ({ onFormClose, collectionId }: ConnectModalProps) => {
   const { getCollectionRoles, collectionNftsRoles, updateTeam } = useCollections();
@@ -98,10 +89,10 @@ const EditTeamModal = ({ onFormClose, collectionId }: ConnectModalProps) => {
                 </SGroup>
               </SFormBlock>
 
-              <Note>
+              <SNote>
                 Note: You can disable any role by setting an empty value instead of the address, but this action is
                 irreversible.
-              </Note>
+              </SNote>
 
               <SPageControls className='pb-0 pt-0'>
                 <Stack direction='horizontal' gap={3}>

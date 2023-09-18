@@ -7,7 +7,7 @@ import ActionButton from '@buttons/ActionButton.tsx';
 import { NFT_PALLETS, SUPPORTED_ATTRIBUTE_KEYS } from '@helpers/config.ts';
 import { CollectionSnapshot } from '@helpers/interfaces.js';
 import { CssFontRegularS, SFormBlock, SPageControls } from '@helpers/reusableStyles.ts';
-import { SFormLayout, SGroup, SLabel, SModal } from '@helpers/styledComponents.ts';
+import { SFormLayout, SGroup, SLabel, SModal, SNote } from '@helpers/styledComponents.ts';
 
 import { useCollections } from '@hooks/useCollections.ts';
 
@@ -25,8 +25,15 @@ const SDescription = styled.p`
 `;
 
 const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAreLocked }: ConnectModalProps) => {
-  const { getCollectionAttributes, collectionNftsAttributes, collectionUniquesAttributes, attachSnapshot } =
-    useCollections();
+  const {
+    getCollectionAttributes,
+    getCollectionRoles,
+    collectionNftsAttributes,
+    collectionUniquesAttributes,
+    collectionNftsRoles,
+    collectionUniquesRoles,
+    attachSnapshot,
+  } = useCollections();
   const linkRef = useRef<HTMLInputElement>(null);
   const providerRef = useRef<HTMLInputElement>(null);
 
@@ -45,11 +52,16 @@ const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAr
     };
   }, [collectionNftsAttributes, collectionUniquesAttributes, pallet]);
 
+  const collectionRoles = useMemo(
+    () => (pallet === 'nfts' ? collectionNftsRoles : collectionUniquesRoles),
+    [collectionNftsRoles, collectionUniquesRoles, pallet],
+  );
+
   const saveForm = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
 
-      if (linkRef.current !== null && providerRef.current !== null) {
+      if (linkRef.current !== null && providerRef.current !== null && collectionRoles !== null) {
         const newValues: CollectionSnapshot = {
           link: linkRef.current.value,
           provider: providerRef.current.value,
@@ -61,24 +73,45 @@ const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAr
         };
 
         onFormClose();
-        attachSnapshot(pallet, collectionId, newValues, oldValues);
+        attachSnapshot(pallet, collectionId, newValues, oldValues, collectionRoles);
       }
     },
-    [attributes.snapshotLink, attributes.snapshotProvider, onFormClose, attachSnapshot, pallet, collectionId],
+    [
+      attributes.snapshotLink,
+      attributes.snapshotProvider,
+      onFormClose,
+      attachSnapshot,
+      pallet,
+      collectionId,
+      collectionRoles,
+    ],
   );
 
   useEffect(() => {
+    getCollectionRoles(collectionId, pallet);
     getCollectionAttributes(collectionId, pallet);
-  }, [collectionId, pallet, getCollectionAttributes]);
+  }, [collectionId, pallet, getCollectionAttributes, getCollectionRoles]);
+
+  const formIsDisabled = useMemo(
+    () => attributesAreLocked || (pallet === 'nfts' && !collectionRoles?.admin),
+    [attributesAreLocked, collectionRoles?.admin, pallet],
+  );
 
   return (
     <SModal centered show={true} onHide={onFormClose}>
       <Modal.Header className='border-0'>Attach snapshot</Modal.Header>
       <Modal.Body>
-        {attributes.values === null && <>Loading data...</>}
-        {attributes.values !== null && (
+        {(attributes.values === null || collectionRoles === null) && <>Loading data...</>}
+        {attributes.values !== null && collectionRoles !== null && (
           <SFormLayout onSubmit={saveForm}>
             <section>
+              {pallet === 'nfts' && !collectionRoles?.admin && (
+                <SNote>
+                  <b>Important!</b> The Admin role is disabled in this collections, so the attributes change is not
+                  possible.
+                </SNote>
+              )}
+
               <SFormBlock>
                 <SGroup className='text-left'>
                   <SLabel>IPFS Link</SLabel>
@@ -86,7 +119,7 @@ const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAr
                     type='text'
                     ref={linkRef}
                     defaultValue={attributes.snapshotLink}
-                    disabled={attributesAreLocked}
+                    disabled={formIsDisabled}
                   />
                 </SGroup>
                 <SDescription>e.g. ipfs://ipfs/abcd</SDescription>
@@ -99,7 +132,7 @@ const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAr
                     type='text'
                     ref={providerRef}
                     defaultValue={attributes.snapshotProvider}
-                    disabled={attributesAreLocked}
+                    disabled={formIsDisabled}
                   />
                 </SGroup>
                 <SDescription>e.g. https://ipfs.filebase.io/ipfs/</SDescription>
@@ -110,7 +143,7 @@ const AttachAttributesModal = ({ onFormClose, collectionId, pallet, attributesAr
                   <ActionButton type='button' className='stroke w-100' action={onFormClose}>
                     Back
                   </ActionButton>
-                  <ActionButton type='submit' className='main w-75' disabled={attributesAreLocked}>
+                  <ActionButton type='submit' className='main w-75' disabled={formIsDisabled}>
                     Save
                   </ActionButton>
                 </Stack>
