@@ -8,13 +8,15 @@ import Header from '@header/Header.tsx';
 import { ALTERNATE_BACKGROUND_CLASSNAME, mediaQueries } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
+import ClaimNft from '@pages/Claim/ClaimNft.tsx';
+import SelectCollection from '@pages/Claim/SelectCollection.tsx';
 import Main from '@pages/Main/Main.tsx';
-import CollectionsPalletNfts from '@pages/MyAssets/Collections/CollectionsPalletNfts.tsx';
-import CollectionsPalletUniques from '@pages/MyAssets/Collections/CollectionsPalletUniques.tsx';
-import CreateCollection from '@pages/MyAssets/Collections/CreateCollection.tsx';
+import CollectionsPalletNfts from '@pages/ManageCollections/CollectionsPalletNfts.tsx';
+import CollectionsPalletUniques from '@pages/ManageCollections/CollectionsPalletUniques.tsx';
+import CreateCollection from '@pages/ManageCollections/CreateCollection.tsx';
 import MintNft from '@pages/MyAssets/MintNft/MintNft.tsx';
 import MintNftIndex from '@pages/MyAssets/MintNft/MintNftIndex.tsx';
-import SelectCollection from '@pages/MyAssets/MintNft/SelectCollection.tsx';
+import SelectCollectionOld from '@pages/MyAssets/MintNft/SelectCollection.tsx';
 import NftEdit from '@pages/MyAssets/Nfts/NftEdit.tsx';
 import MyNfts from '@pages/MyAssets/Nfts/Nfts.tsx';
 
@@ -98,6 +100,26 @@ const App = () => (
           }
         />
 
+        <Route path={routes.claim.index} element={<Outlet />}>
+          <Route
+            index
+            element={
+              <PrivateRoute>
+                <SelectCollection />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path={routes.claim.claimNft()}
+            element={
+              <PrivateRoute>
+                <ClaimNft />
+              </PrivateRoute>
+            }
+          />
+        </Route>
+
         <Route path={routes.myAssets.index} element={<Outlet />}>
           <Route index element={<Navigate to={routes.myAssets.mintNftMain} replace />} />
 
@@ -106,7 +128,7 @@ const App = () => (
               index
               element={
                 <PrivateRoute>
-                  <SelectCollection />
+                  <SelectCollectionOld />
                 </PrivateRoute>
               }
             />

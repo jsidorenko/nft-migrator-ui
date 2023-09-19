@@ -1,4 +1,6 @@
 const COLLECTION_ID_PARAM = ':collectionId';
+const SOURCE_COLLECTION_ID_PARAM = ':sourceCollectionId';
+const DESTINATION_COLLECTION_ID_PARAM = ':destinationCollectionId';
 const NFT_ID_PARAM = ':nftId';
 
 export const routes = {
@@ -8,6 +10,14 @@ export const routes = {
     palletNfts: '/my-collections/pallet-nfts',
     palletUniques: '/my-collections/pallet-uniques',
     cloneCollection: (collectionId: string = COLLECTION_ID_PARAM) => `/my-collections/clone-collection/${collectionId}`,
+  },
+
+  claim: {
+    index: '/claim-nft',
+    claimNft: (
+      sourceCollectionId: string = SOURCE_COLLECTION_ID_PARAM,
+      destinationCollectionId: string = DESTINATION_COLLECTION_ID_PARAM,
+    ) => `/claim-nft/${sourceCollectionId}-${destinationCollectionId}/`,
   },
 
   myAssets: {

@@ -21,3 +21,13 @@ export const useLoadOwnedUniquesCollections = () => {
 
   return ownedUniquesCollections;
 };
+
+export const useLoadMappedCollections = () => {
+  const { getMappedCollections, mappedCollections } = useCollections();
+
+  useEffect(() => {
+    getMappedCollections();
+  }, [getMappedCollections]);
+
+  return mappedCollections;
+};

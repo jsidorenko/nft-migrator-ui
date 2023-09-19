@@ -193,8 +193,8 @@ const CreateCollection = () => {
               <SDescription>When disabled, the attributes in the CollectionOwner namespace will be locked</SDescription>
               {collectionUniquesMetadata?.attributesAreLocked && (
                 <SDescription className='note'>
-                  Note: Source collection`s attributes are locked, if you lock the attributes in this collection, you
-                  won`t be able to attach the required data snapshot
+                  Warning: Source collection`s attributes are locked, if you lock the attributes in this collection as
+                  well (by unchecking the checkbox above), you won`t be able to attach the required data snapshot after.
                 </SDescription>
               )}
 

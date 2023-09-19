@@ -19,6 +19,7 @@ import {
   CollectionParsedMetadata,
   CollectionRoles,
   CollectionSnapshot,
+  MappedCollection,
 } from '@helpers/interfaces.ts';
 import { routes } from '@helpers/routes.ts';
 import {
@@ -36,6 +37,7 @@ export const useCollections = () => {
   const { openModalStatus, setStatus, setAction } = useModalStatus();
   const [ownedNftsCollections, setOwnedNftsCollections] = useState<CollectionMetadata[] | null>(null);
   const [ownedUniquesCollections, setOwnedUniquesCollections] = useState<CollectionMetadata[] | null>(null);
+  const [mappedCollections, setMappedCollections] = useState<MappedCollection[] | null>(null);
   const [collectionNftsMetadata, setCollectionNftsMetadata] = useState<CollectionMetadata | null>(null);
   const [collectionUniquesMetadata, setCollectionUniquesMetadata] = useState<CollectionMetadata | null>(null);
   const [collectionNftsRoles, setCollectionNftsRoles] = useState<CollectionRoles | null>(null);
@@ -217,6 +219,126 @@ export const useCollections = () => {
     },
     [api, getOwnedCollectionIds, fetchCollectionsMetadata],
   );
+
+  const getMappedCollections = useCallback(async () => {
+    if (api) {
+      let result: MappedCollection[] = [];
+
+      try {
+        // first, we need to get all the collections with metadata from the uniques pallet
+        const uniquesCollections = new Map<string, { metadata: string; owner: string }>();
+        const uniquesCollectionsWithMetadata = new Map<string, string>(); // { collectionId: metadata}
+        const uniquesMetadataQuery = await api.query.uniques.classMetadataOf.entries();
+        for (const record of uniquesMetadataQuery) {
+          const [
+            {
+              args: [collectionId],
+            },
+            data,
+          ] = record;
+          if (!data.isSome) continue;
+          const metadata = data.unwrap().data.toPrimitive() as string;
+          if (!metadata) continue;
+          uniquesCollectionsWithMetadata.set(collectionId.toString(), metadata);
+        }
+
+        if (uniquesCollectionsWithMetadata.size === 0) {
+          setMappedCollections(result);
+          return;
+        }
+
+        // next, we group found collections by owner
+        const collectionIds = [...uniquesCollectionsWithMetadata.keys()];
+        const uniquesCollectionsByOwner = new Map<string, string[]>(); // { owner => Array<collectionId> }
+        const uniquesCollectionsQuery = await api.query.uniques.class.multi(collectionIds);
+        uniquesCollectionsQuery.forEach((record, index) => {
+          if (!record.isSome) return;
+          const owner = record.unwrap().owner.toString();
+          const id = collectionIds[index];
+          uniquesCollections.set(id, { metadata: uniquesCollectionsWithMetadata.get(id)!, owner });
+          uniquesCollectionsByOwner.set(owner, [...(uniquesCollectionsByOwner.get(owner) || []), id]);
+        });
+
+        // now, we need to get all the collections created by collected owners in the pallet-nfts
+        const uniquesOwners = [...uniquesCollectionsByOwner.keys()];
+        const nftsCollectionToOwner = new Map<string, string>(); // { collectionId, owner }
+        const allNftsCollectionIds: string[] = [];
+
+        for (const owner of uniquesOwners) {
+          const ownerCollectionsQuery = await api.query.nfts.collectionAccount.keys(owner);
+          const ownerCollections = ownerCollectionsQuery.map(({ args: [, collectionId] }) => collectionId.toString());
+
+          allNftsCollectionIds.push(...ownerCollections);
+
+          for (const collectionId of ownerCollections) {
+            nftsCollectionToOwner.set(collectionId, owner);
+          }
+        }
+
+        // attach the metadata for found pallet-nfts collections
+        const nftsCollections = new Map<string, { metadata: string; owner: string }>();
+        const nftsCollectionMetadataQuery = await api.query.nfts.collectionMetadataOf.multi(allNftsCollectionIds);
+        nftsCollectionMetadataQuery.forEach((record, index) => {
+          if (!record.isSome) return;
+          const id = allNftsCollectionIds[index];
+          const metadata = record.unwrap().data.toPrimitive() as string;
+          const owner = nftsCollectionToOwner.get(id);
+          if (!metadata || !owner) return;
+          nftsCollections.set(id, { metadata, owner });
+        });
+
+        // group by owner to ease the further mapping
+        const nftsCollectionsByOwner = new Map<string, { id: string; metadata: string }[]>();
+        for (const [collectionId, data] of nftsCollections.entries()) {
+          const records = nftsCollectionsByOwner.get(data.owner) || [];
+          records.push({ id: collectionId, metadata: data.metadata });
+          nftsCollectionsByOwner.set(data.owner, records);
+        }
+
+        // map collections by metadata and owner
+        const metadataLinks = new Set<string>();
+        const mappedUniquesCollections = [...uniquesCollections.entries()].reduce((memo, [collectionId, data]) => {
+          const matchedCollections = (nftsCollectionsByOwner.get(data.owner) || [])
+            .filter(({ metadata }) => metadata === data.metadata)
+            .sort(({ id: id1 }, { id: id2 }) => Number(id2) - Number(id1)); // in descending order
+
+          if (matchedCollections.length) {
+            memo.add({
+              sourceCollection: collectionId,
+              targetCollection: matchedCollections[0].id,
+              metadataLink: data.metadata,
+            });
+            metadataLinks.add(data.metadata);
+          }
+
+          return memo;
+        }, new Set<MappedCollection>());
+
+        // fetch the metadata from mapped collections
+        const fetchMetadataLinks = [...metadataLinks.values()];
+        const fetchCalls = fetchMetadataLinks.map(fetchMetadataFromIpfs);
+        const fetchedData = await Promise.allSettled(fetchCalls);
+        const metadataToResult = new Map<string, CollectionParsedMetadata>();
+
+        fetchedData.forEach((result, index) => {
+          if (!fetchMetadataLinks[index] || result.status !== 'fulfilled' || !result.value) return;
+
+          const metadataLink = fetchMetadataLinks[index];
+          metadataToResult.set(metadataLink, result.value);
+        });
+
+        // attach the fetched metadata to mapped collections
+        result = [...mappedUniquesCollections.values()].map((mappedCollection) => ({
+          ...mappedCollection,
+          json: metadataToResult.get(mappedCollection.metadataLink),
+        }));
+      } catch (error) {
+        console.error(error);
+      }
+
+      setMappedCollections(result);
+    }
+  }, [api]);
 
   const getCollectionMetadata = useCallback(
     async (collectionId: string, pallet: NFT_PALLETS) => {
@@ -669,6 +791,7 @@ export const useCollections = () => {
     getCollectionConfig,
     getCollectionMetadata,
     getCollectionRoles,
+    getMappedCollections,
     getOwnedCollections,
     createCollection,
     updateTeam,
@@ -676,6 +799,7 @@ export const useCollections = () => {
     validateOwnedCollection,
     ownedNftsCollections,
     ownedUniquesCollections,
+    mappedCollections,
     collectionNftsMetadata,
     collectionUniquesMetadata,
     isCollectionMetadataLoading,

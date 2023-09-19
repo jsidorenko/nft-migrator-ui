@@ -28,6 +28,13 @@ export interface CollectionMetadata {
   attributesAreLocked: boolean;
 }
 
+export interface MappedCollection {
+  sourceCollection: string;
+  targetCollection: string;
+  metadataLink: string;
+  json?: CollectionParsedMetadata;
+}
+
 export interface CollectionParsedMetadata {
   name?: string;
   description?: string;

@@ -38,6 +38,6 @@ TODO:
   - [X] create new collection page (read src_collection param), for metadata just leave an input field
   - [X] change team
 - user:
-  - [ ] source collection's selector (separate page)
-  - [ ] target collection's selector (read the attribute or try to find by metadata and find the attribute + validate the owner)
+  - [X] collection's selector
+  - [ ] claim NFT page (read the attribute or try to find by metadata and find the attribute + validate the owner)
 

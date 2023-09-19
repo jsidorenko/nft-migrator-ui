@@ -20,7 +20,7 @@ import { routes } from '@helpers/routes.ts';
 import { SCard } from '@helpers/styledComponents.ts';
 
 const SIntroText = styled.div`
-  ${CssFontRegularM}
+  ${CssFontRegularM};
 
   max-width: 320px;
   margin: 0 auto;
@@ -57,8 +57,8 @@ const SLinkCard = styled(SCard)`
   }
 
   .card-text {
-    ${CssFontRegularS}
-    color: ${({ theme }) => theme.textAndIconsTertiary}
+    ${CssFontRegularS};
+    color: ${({ theme }) => theme.textAndIconsTertiary};
   }
 `;
 
@@ -104,7 +104,7 @@ const Main = () => {
                 <SStepButton className='secondary'>Start</SStepButton>
               </Card.Footer>
             </SLinkCard>
-            <SLinkCard onClick={() => navigate(routes.myAssets.index)}>
+            <SLinkCard onClick={() => navigate(routes.claim.index)}>
               <Card.Body>
                 <Card.Title>For NFT owners</Card.Title>
                 <Card.Text className='mb-4 mt-4'>I want to migrate my NFTs</Card.Text>
