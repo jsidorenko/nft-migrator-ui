@@ -126,7 +126,7 @@ export const getCidHash = (cid: unknown): string => {
   return cid;
 };
 
-export const getFetchableUrl = (cid: unknown): string => {
+export const getFetchableUrl = (cid: unknown, gateway?: string): string => {
   const cidHash = getCidHash(cid);
 
   if (!cidHash) {
@@ -135,7 +135,7 @@ export const getFetchableUrl = (cid: unknown): string => {
     return cidHash;
   }
 
-  return `${IPFS_GATEWAY}${cidHash}`;
+  return `${gateway || IPFS_GATEWAY}${cidHash}`;
 };
 
 export const getFetchableImageUrl = (cid: unknown): string => {
@@ -168,6 +168,10 @@ export const fetchJson = async (url: string, options?: RequestInit): Promise<Any
 
 export const stringOrNothing = (value: unknown): string | undefined => {
   return typeof value === 'string' ? value : undefined;
+};
+
+export const timeout = async (time: number) => {
+  return new Promise((res) => setTimeout(res, time));
 };
 
 export const getEnumOptions = (api: ApiPromise, typeName: string): string[] => {

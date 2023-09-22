@@ -8,8 +8,6 @@ import ShowImage from '@common/ShowImage.tsx';
 import { CollectionMetadata } from '@helpers/interfaces.ts';
 import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 
-import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
-
 import LockIcon from '@images/icons/lock.svg';
 
 const STableImage = styled.td`
@@ -20,7 +18,7 @@ const SName = styled.div`
   ${CssFontSemiBoldL};
 `;
 
-const SMapped = styled.div`
+const SExtraInfo = styled.div`
   ${CssFontRegularXS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
@@ -36,9 +34,8 @@ interface CollectionPalletNftsProps {
 }
 
 const CollectionPalletNfts = ({ collection, onChangeTeam, onAttachAttributes }: CollectionPalletNftsProps) => {
-  const { id, json, isMapped, attributesAreLocked } = collection;
+  const { id, json, isMapped, attributesAreLocked, items } = collection;
   const { name, image } = json || {};
-  const counter = useCountOwnedNfts(id);
 
   return (
     <tr>
@@ -47,10 +44,12 @@ const CollectionPalletNfts = ({ collection, onChangeTeam, onAttachAttributes }: 
       </STableImage>
       <td>
         <SName>{name || '- no title -'}</SName>
-        <SMapped>
+        <SExtraInfo>
           Mapped: <b>{isMapped ? 'yes' : 'no'}</b>
-        </SMapped>
-        <SCounter>{counter}</SCounter>
+          <br />
+          Id: {id}
+        </SExtraInfo>
+        <SCounter>{items} items</SCounter>
       </td>
       <td align='center' className='w-25'>
         <ActionButton type='button' className='stroke w-100' action={onChangeTeam}>

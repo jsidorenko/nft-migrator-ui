@@ -13,8 +13,8 @@ const SImg = styled.div`
 `;
 
 interface ShowImageProps {
-  imageCid: string | undefined;
-  altText: string | undefined;
+  imageCid?: string;
+  altText?: string;
 }
 
 const ShowImage = ({ imageCid, altText }: ShowImageProps) => {

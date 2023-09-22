@@ -10,8 +10,6 @@ import { CollectionMetadata } from '@helpers/interfaces.ts';
 import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
-import { useCountOwnedNfts } from '@hooks/useCountOwnedNfts.ts';
-
 import LockIcon from '@images/icons/lock.svg';
 
 const STableImage = styled.td`
@@ -27,6 +25,11 @@ const SMetadata = styled.div`
   color: ${({ theme }) => theme.textAndIconsSecondary};
   max-width: 600px;
   overflow: auto;
+`;
+
+const SId = styled.div`
+  ${CssFontRegularXS};
+  color: ${({ theme }) => theme.textAndIconsSecondary};
 `;
 
 const SCounter = styled.div`
@@ -45,10 +48,8 @@ interface CollectionPalletUniquesProps {
 }
 
 const CollectionPalletUniques = ({ collection, onAttachAttributes }: CollectionPalletUniquesProps) => {
-  const { id, json, metadataLink, isMapped, attributesAreLocked } = collection;
+  const { id, json, metadataLink, isMapped, attributesAreLocked, items } = collection;
   const { name, image } = json || {};
-
-  const counter = useCountOwnedNfts(id);
 
   return (
     <tr>
@@ -58,7 +59,8 @@ const CollectionPalletUniques = ({ collection, onAttachAttributes }: CollectionP
       <td>
         <SName>{name || '- no title -'}</SName>
         <SMetadata>Metadata: {metadataLink || '-'}</SMetadata>
-        <SCounter>{counter}</SCounter>
+        <SId>Id: {id}</SId>
+        <SCounter>{items} items</SCounter>
       </td>
       <td align='center'>
         {isMapped ? (

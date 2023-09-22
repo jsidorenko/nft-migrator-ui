@@ -6,8 +6,6 @@ import { styled } from 'styled-components';
 import ActionButton from '@buttons/ActionButton.tsx';
 import IconArrowButton from '@buttons/IconArrowButton.tsx';
 
-import Title from '@common/Title.tsx';
-
 import { CssFontRegularM, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
@@ -83,9 +81,8 @@ const SelectCollection = () => {
 
   return (
     <>
-      <Title className='main no-margin'>Migrate your NFTs</Title>
       <SContainer>
-        <SChoose>Select a collection</SChoose>
+        <SChoose>Select collection</SChoose>
         {collections.map((collection) => (
           <SCollectionOption
             to={routes.claim.claimNft(collection.sourceCollection, collection.targetCollection)}

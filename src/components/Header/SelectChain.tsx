@@ -136,7 +136,6 @@ const SelectChain = () => {
   };
 
   const selectChain = (chain: Chain) => {
-    console.log(chain);
     setIsChainListVisible(false);
     setStoredChain(chain);
     navigate(routes.homepage);

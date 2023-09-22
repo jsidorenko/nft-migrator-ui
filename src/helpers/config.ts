@@ -48,8 +48,10 @@ export enum StatusMessages {
   TRANSACTION_CONFIRM = 'Please confirm transaction in your wallet',
   UPDATING_TEAM = 'Updating team, please wait',
   TEAM_UPDATED = 'Team updated!',
-  UPDATING_ATTRIBUTES = 'Updating attributes, please wait',
+  ATTACHING_SNAPSHOT = 'Attaching snapshot, please wait',
   SNAPSHOT_ATTACHED = 'Snapshot attached!',
+  CLAIMING_NFT = 'Claiming NFT, please wait',
+  NFT_CLAIMED = 'NFT was successfully claimed!',
 }
 
 export enum MintTypes {

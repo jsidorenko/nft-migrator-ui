@@ -1,6 +1,6 @@
 const COLLECTION_ID_PARAM = ':collectionId';
 const SOURCE_COLLECTION_ID_PARAM = ':sourceCollectionId';
-const DESTINATION_COLLECTION_ID_PARAM = ':destinationCollectionId';
+const TARGET_COLLECTION_ID_PARAM = ':targetCollectionId';
 const NFT_ID_PARAM = ':nftId';
 
 export const routes = {
@@ -16,8 +16,8 @@ export const routes = {
     index: '/claim-nft',
     claimNft: (
       sourceCollectionId: string = SOURCE_COLLECTION_ID_PARAM,
-      destinationCollectionId: string = DESTINATION_COLLECTION_ID_PARAM,
-    ) => `/claim-nft/${sourceCollectionId}-${destinationCollectionId}/`,
+      targetCollectionId: string = TARGET_COLLECTION_ID_PARAM,
+    ) => `/claim-nft/${sourceCollectionId}/${targetCollectionId}/`,
   },
 
   myAssets: {

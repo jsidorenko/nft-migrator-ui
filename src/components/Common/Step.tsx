@@ -5,7 +5,7 @@ import { CommonStyleProps } from '@helpers/interfaces.ts';
 import { CssFontSemiBoldS, mediaQueries } from '@helpers/reusableStyles.ts';
 
 const SStep = styled.div`
-  ${CssFontSemiBoldS}
+  ${CssFontSemiBoldS};
   display: flex;
   align-items: center;
   gap: 12px;
@@ -23,11 +23,20 @@ const SStep = styled.div`
     margin-bottom: 0;
   }
 
-  &.active {
+  a {
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &.active,
+  &.active a {
     color: ${({ theme }) => theme.textAndIconsPrimary};
   }
 
-  &.disabled {
+  &.disabled,
+  &.disabled a {
     color: ${({ theme }) => theme.textAndIconsDisabled};
   }
 

@@ -1,3 +1,5 @@
+import { PalletNftsPreSignedMint } from '@polkadot/types/lookup';
+
 import {
   ChainThemes,
   ChainTitles,
@@ -26,6 +28,8 @@ export interface CollectionMetadata {
   json?: CollectionParsedMetadata;
   metadataIsLocked: boolean;
   attributesAreLocked: boolean;
+  items: number;
+  owner: string;
 }
 
 export interface MappedCollection {
@@ -39,6 +43,28 @@ export interface CollectionParsedMetadata {
   name?: string;
   description?: string;
   image?: string;
+}
+
+export interface CollectionMigrationSnapshot {
+  sourceCollection?: string;
+  targetCollection?: string;
+  signer: string;
+  signatures: SnapshotSignature[];
+}
+
+export interface SnapshotSignature {
+  data: string;
+  signature: string;
+}
+
+export interface NftMigrationData {
+  encodedNft: string;
+  signature: string;
+  signer: string;
+  preSignInfo: PalletNftsPreSignedMint;
+  expired: boolean;
+  claimed: boolean;
+  json?: CollectionParsedMetadata;
 }
 
 // TODO: remove
@@ -57,6 +83,11 @@ export interface CollectionMetadataRecordUniques {
   data: string;
   deposit: string;
   isFrozen: boolean;
+}
+
+export interface CollectionInfo {
+  items: number;
+  owner: string;
 }
 
 // TODO: review
@@ -91,7 +122,10 @@ export interface CollectionRoles {
   freezer?: string;
 }
 
-export type CollectionAttribute = Record<string, string>;
+export interface CollectionAttribute {
+  key: string;
+  value: string;
+}
 
 export interface CollectionSnapshot {
   link?: string;

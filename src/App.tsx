@@ -8,6 +8,7 @@ import Header from '@header/Header.tsx';
 import { ALTERNATE_BACKGROUND_CLASSNAME, mediaQueries } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 
+import ClaimIndex from '@pages/Claim/ClaimIndex.tsx';
 import ClaimNft from '@pages/Claim/ClaimNft.tsx';
 import SelectCollection from '@pages/Claim/SelectCollection.tsx';
 import Main from '@pages/Main/Main.tsx';
@@ -100,7 +101,7 @@ const App = () => (
           }
         />
 
-        <Route path={routes.claim.index} element={<Outlet />}>
+        <Route path={routes.claim.index} element={<ClaimIndex />}>
           <Route
             index
             element={
