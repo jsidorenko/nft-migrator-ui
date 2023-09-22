@@ -28,7 +28,7 @@ const SIntroText = styled.div`
   color: ${({ theme }) => theme.textAndIconsSecondary};
 
   @media ${mediaQueries.tablet} {
-    ${CssFontRegularL}
+    ${CssFontRegularL};
     max-width: 624px;
   }
 

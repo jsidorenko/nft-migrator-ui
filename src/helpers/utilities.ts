@@ -15,24 +15,6 @@ export const ellipseAddress = (address = '', charCount = 4): string => {
 
   return `${address.slice(0, charCount)}...${address.slice(-charCount)}`;
 };
-
-export const toUint8Array = (data: string) => new TextEncoder().encode(data);
-
-export const getBlockNumber = async (api: ApiPromise, timestamp?: number): Promise<number | undefined> => {
-  if (typeof timestamp === 'undefined') {
-    return timestamp;
-  }
-
-  const blockTime = (api.consts.babe.expectedBlockTime.toPrimitive() as number) / 1000; // in seconds
-  const activeBlockNumber = (await api.derive.chain.bestNumber()).toNumber();
-
-  const currentDate = Math.floor(Date.now() / 1000); // current timestamp in seconds
-  const laterDate = Math.floor(timestamp / 1000); // user provided timestamp in seconds
-
-  return Math.floor((laterDate - currentDate) / blockTime + activeBlockNumber);
-};
-
-export const pricePattern = (maxPrecision: number): string => `^(0|[1-9][0-9]*)([.][0-9]{0,${maxPrecision}})?$`;
 export const wholeNumbersPattern = '^[0-9]*$';
 
 export const unitToPlanck = (units: string, decimals: number): string => {
@@ -55,10 +37,6 @@ export const planckToUnit = (planck: string, api: ApiPromise, withSymbol: boolea
   }
 
   return formattedBalance;
-};
-
-export const generateNftId = (): number => {
-  return Math.floor(Date.now() / 1000);
 };
 
 export const getCleanFormattedBalance = (planck: BN, decimals: number): string => {

@@ -21,23 +21,7 @@ npm start
 
 TODO:
 
-- [X] on login send to the flow selector
-- [X] try to open the private page when being not logged in
-- [ ] check Not found page
-- [X] flow selector (owner/user)
-- [X] define routes/pages
-  /my-collections/pallet-uniques
-  /my-collections/pallet-nfts
-- owner:
-  - [X] my collections in the uniques pallet (change the title to represent the pallet)
-  - [X] icon if the collection is migrated (find the same collection by the same owner)
-  - [X] button to migrate (clone to pallet-nfts)
-  - [X] attach a snapshot
-  - [X] show metadata
-  - [X] collections in the nfts pallet
-  - [X] create new collection page (read src_collection param), for metadata just leave an input field
-  - [X] change team
-- user:
-  - [X] collection's selector
-  - [ ] claim NFT page (read the attribute or try to find by metadata and find the attribute + validate the owner)
-
+- [ ] Refactor BitFlags
+- [X] Code clean up
+- [ ] Connect WC
+- [ ] Better README

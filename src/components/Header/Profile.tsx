@@ -82,7 +82,7 @@ const SSimpleAction = styled.div`
     min-width: 190px;
     height: 40px;
     color: ${({ theme }) => theme.textAndIconsPrimary};
-    ${CssFontSemiBoldS}
+    ${CssFontSemiBoldS};
     line-height: 40px;
   }
 

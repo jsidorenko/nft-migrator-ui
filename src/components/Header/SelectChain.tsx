@@ -52,12 +52,12 @@ const SCurrentChain = styled.button`
   }
 
   span {
-    ${CssFontSemiBoldS}
+    ${CssFontSemiBoldS};
     text-transform: capitalize;
   }
 
   .arrow-down {
-    ${CssArrowDown}
+    ${CssArrowDown};
     width: 18px;
   }
 `;
@@ -83,7 +83,7 @@ const SChainList = styled.div`
 `;
 
 const SChainOption = styled.div`
-  ${CssFontSemiBoldS}
+  ${CssFontSemiBoldS};
   display: flex;
   position: relative;
   min-width: 240px;

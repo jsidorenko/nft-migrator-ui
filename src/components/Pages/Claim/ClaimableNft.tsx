@@ -1,16 +1,12 @@
 import { memo } from 'react';
-import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import ActionButton from '@buttons/ActionButton.tsx';
 
 import ShowImage from '@common/ShowImage.tsx';
 
-import { CollectionMetadata, NftMigrationData } from '@helpers/interfaces.ts';
-import { CssFontRegularS, CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
-import { routes } from '@helpers/routes.ts';
-
-import LockIcon from '@images/icons/lock.svg';
+import type { NftMigrationData } from '@helpers/interfaces.ts';
+import { CssFontRegularXS, CssFontSemiBoldL } from '@helpers/reusableStyles.ts';
 
 const STableImage = styled.td`
   width: 100px;
@@ -20,20 +16,9 @@ const SName = styled.div`
   ${CssFontSemiBoldL};
 `;
 
-const SMetadata = styled.div`
-  ${CssFontRegularXS};
-  color: ${({ theme }) => theme.textAndIconsSecondary};
-  max-width: 600px;
-  overflow: auto;
-`;
-
 const SId = styled.div`
   ${CssFontRegularXS};
   color: ${({ theme }) => theme.textAndIconsSecondary};
-`;
-
-const SCounter = styled.div`
-  ${CssFontRegularS};
 `;
 
 const ReadyButton = styled(ActionButton)`

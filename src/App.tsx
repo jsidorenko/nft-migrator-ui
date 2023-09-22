@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { createGlobalStyle, styled } from 'styled-components';
 
 import PrivateRoute from '@common/PrivateRoute.tsx';
@@ -15,11 +15,6 @@ import Main from '@pages/Main/Main.tsx';
 import CollectionsPalletNfts from '@pages/ManageCollections/CollectionsPalletNfts.tsx';
 import CollectionsPalletUniques from '@pages/ManageCollections/CollectionsPalletUniques.tsx';
 import CreateCollection from '@pages/ManageCollections/CreateCollection.tsx';
-import MintNft from '@pages/MyAssets/MintNft/MintNft.tsx';
-import MintNftIndex from '@pages/MyAssets/MintNft/MintNftIndex.tsx';
-import SelectCollectionOld from '@pages/MyAssets/MintNft/SelectCollection.tsx';
-import NftEdit from '@pages/MyAssets/Nfts/NftEdit.tsx';
-import MyNfts from '@pages/MyAssets/Nfts/Nfts.tsx';
 
 const SMainContainer = styled.main`
   width: 100%;
@@ -119,70 +114,6 @@ const App = () => (
               </PrivateRoute>
             }
           />
-        </Route>
-
-        <Route path={routes.myAssets.index} element={<Outlet />}>
-          <Route index element={<Navigate to={routes.myAssets.mintNftMain} replace />} />
-
-          <Route path={routes.myAssets.mintNftMain} element={<MintNftIndex />}>
-            <Route
-              index
-              element={
-                <PrivateRoute>
-                  <SelectCollectionOld />
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path={routes.myAssets.createCollection}
-              element={
-                <PrivateRoute>
-                  <CreateCollection />
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path={routes.myAssets.mintNft()}
-              element={
-                <PrivateRoute>
-                  <MintNft />
-                </PrivateRoute>
-              }
-            />
-          </Route>
-
-          <Route path={routes.myAssets.collections} element={<Outlet />}>
-            <Route
-              index
-              element={
-                <PrivateRoute>
-                  <CollectionsPalletNfts />
-                </PrivateRoute>
-              }
-            />
-
-            <Route path={routes.myAssets.nfts()} element={<Outlet />}>
-              <Route
-                index
-                element={
-                  <PrivateRoute redirectTo={routes.myAssets.collections}>
-                    <MyNfts />
-                  </PrivateRoute>
-                }
-              />
-
-              <Route
-                path={routes.myAssets.nftEdit()}
-                element={
-                  <PrivateRoute redirectTo={routes.myAssets.collections}>
-                    <NftEdit />
-                  </PrivateRoute>
-                }
-              />
-            </Route>
-          </Route>
         </Route>
 
         <Route path='*' element={<Navigate to={routes.homepage} replace />} />

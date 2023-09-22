@@ -41,9 +41,6 @@ export enum StatusMessages {
   COLLECTION_CREATED = 'Collection created!',
   COLLECTION_CREATING = 'Creating collection, please wait',
   METADATA_UPDATED = 'Metadata updated',
-  METADATA_UPDATING = 'Setting metadata, please wait',
-  NFT_MINTED = 'NFT minted!',
-  NFT_MINTING = 'Minting NFT, please wait',
   TRANSACTION_CANCELED = 'Transaction was canceled',
   TRANSACTION_CONFIRM = 'Please confirm transaction in your wallet',
   UPDATING_TEAM = 'Updating team, please wait',
@@ -89,7 +86,6 @@ export const IPFS_GATEWAY = process.env.REACT_APP_IPFS_GATEWAY;
 export const METADATA_GATEWAY = process.env.REACT_APP_METADATA_GATEWAY;
 export const IMAGES_GATEWAY = process.env.REACT_APP_IMAGES_GATEWAY;
 export const IPFS_NATIVE_SCHEME = 'ipfs://';
-export const defaultUiSettings = { viewAs: ViewAsOptions.CARDS };
 
 // first chain in the list will be default chain
 export const chains: Chain[] = [

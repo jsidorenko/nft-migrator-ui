@@ -4,7 +4,6 @@ import type {
   PalletNftsCollectionSetting,
   PalletNftsPreSignedMint,
 } from '@polkadot/types/lookup';
-import { SpCoreSr25519Signature } from '@polkadot/types/lookup';
 import type { AnyJson } from '@polkadot/types/types';
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -941,7 +940,9 @@ export const useCollections = () => {
 
         // reconstruct nft objects from the signature data
         const MAX_CLAIMS = 100;
+        const activeBlockNumber = (await api.derive.chain.bestNumber()).toNumber();
         const now = (await api.rpc.chain.getHeader()).number.toNumber();
+        console.log({ activeBlockNumber, now });
         let foundNfts: NftMigrationData[] = [];
 
         for (const { data, signature } of snapshotData.signatures) {

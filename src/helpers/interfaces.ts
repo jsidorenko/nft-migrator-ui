@@ -67,13 +67,6 @@ export interface NftMigrationData {
   json?: CollectionParsedMetadata;
 }
 
-// TODO: remove
-export interface CollectionMetadataData {
-  name: string;
-  description?: string;
-  image?: string;
-}
-
 export interface CollectionMetadataRecordNfts {
   data: string;
   deposit: string;
@@ -90,7 +83,6 @@ export interface CollectionInfo {
   owner: string;
 }
 
-// TODO: review
 export interface CollectionConfig {
   settings: number;
   maxSupply?: number;
@@ -103,7 +95,6 @@ export interface CollectionConfig {
   };
 }
 
-// TODO: review
 export interface CollectionConfigJson {
   settings: number;
   maxSupply: number | null;
@@ -135,16 +126,6 @@ export interface CollectionSnapshot {
 export interface AttachAttributesModalData {
   collectionId: string;
   attributesAreLocked: boolean;
-}
-
-export interface NftMetadata extends NftMetadataData {
-  id: string;
-}
-
-export interface NftMetadataData {
-  name: string;
-  description?: string;
-  image?: string;
 }
 
 export interface ActiveAccount {

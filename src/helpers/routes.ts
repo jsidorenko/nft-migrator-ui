@@ -1,7 +1,6 @@
 const COLLECTION_ID_PARAM = ':collectionId';
 const SOURCE_COLLECTION_ID_PARAM = ':sourceCollectionId';
 const TARGET_COLLECTION_ID_PARAM = ':targetCollectionId';
-const NFT_ID_PARAM = ':nftId';
 
 export const routes = {
   homepage: '/',
@@ -18,18 +17,5 @@ export const routes = {
       sourceCollectionId: string = SOURCE_COLLECTION_ID_PARAM,
       targetCollectionId: string = TARGET_COLLECTION_ID_PARAM,
     ) => `/claim-nft/${sourceCollectionId}/${targetCollectionId}/`,
-  },
-
-  myAssets: {
-    index: '/my-assets',
-
-    mintNftMain: '/my-assets/mint-nft',
-    createCollection: '/my-assets/mint-nft/create-collection',
-    mintNft: (collectionId: string = COLLECTION_ID_PARAM) => `/my-assets/mint-nft/${collectionId}/mint`,
-
-    collections: '/my-assets/collections',
-    nfts: (collectionId: string = COLLECTION_ID_PARAM) => `/my-assets/collections/${collectionId}/nfts`,
-    nftEdit: (collectionId: string = COLLECTION_ID_PARAM, nftId: string = NFT_ID_PARAM) =>
-      `/my-assets/collections/${collectionId}/nfts/edit/${nftId}`,
   },
 };
