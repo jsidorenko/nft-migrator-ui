@@ -1,12 +1,8 @@
 import { ApiPromise } from '@polkadot/api';
-import { getTypeDef } from '@polkadot/types';
-import { PalletNftsCollectionRole } from '@polkadot/types/lookup';
 import { AnyJson } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { ToBn } from '@polkadot/util/types';
 import { FormEvent } from 'react';
-
-import { BitFlags } from '@helpers/BitFlags.js';
 
 import { IMAGES_GATEWAY, IPFS_GATEWAY, IPFS_NATIVE_SCHEME, METADATA_GATEWAY } from './config.ts';
 import { ALTERNATE_BACKGROUND_CLASSNAME } from './reusableStyles.ts';
