@@ -479,16 +479,16 @@ export const useCollections = () => {
               result = {};
               if (collectionRoles.length) {
                 type CollectionRole = PalletNftsCollectionRole['type'];
-                const rolesBitflags = initNftBitFlags<CollectionRole>(api, 'PalletNftsCollectionRole');
+                const roles = initNftBitFlags<CollectionRole>(api, 'PalletNftsCollectionRole');
 
                 for (const record of collectionRoles) {
-                  if (rolesBitflags.has('Admin', record.roles)) {
+                  if (roles.has('Admin', record.roles)) {
                     result.admin = record.account;
                   }
-                  if (rolesBitflags.has('Issuer', record.roles)) {
+                  if (roles.has('Issuer', record.roles)) {
                     result.issuer = record.account;
                   }
-                  if (rolesBitflags.has('Freezer', record.roles)) {
+                  if (roles.has('Freezer', record.roles)) {
                     result.freezer = record.account;
                   }
                 }
