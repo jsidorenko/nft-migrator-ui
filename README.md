@@ -21,7 +21,8 @@ npm start
 
 TODO:
 
-- [ ] Refactor BitFlags
+- [X] Refactor BitFlags
 - [X] Code clean up
 - [ ] Connect WC
+- [X] Remove pinata
 - [ ] Better README

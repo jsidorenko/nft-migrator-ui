@@ -13,10 +13,11 @@ import { useAccounts } from '@contexts/AccountsContext.tsx';
 
 import { MintTypes } from '@helpers/config.ts';
 import { CollectionConfig } from '@helpers/interfaces.ts';
+import { valuesToNftBitFlags } from '@helpers/nftBitFlags.ts';
 import { CssFontRegularS, SFormBlock, SPageControls } from '@helpers/reusableStyles.ts';
 import { routes } from '@helpers/routes.ts';
 import { SFormLayout, SGroup, SLabel } from '@helpers/styledComponents.ts';
-import { BitFlags, wholeNumbersPattern } from '@helpers/utilities.ts';
+import { wholeNumbersPattern } from '@helpers/utilities.ts';
 
 import { useCollections } from '@hooks/useCollections.ts';
 
@@ -74,7 +75,7 @@ const CreateCollection = () => {
         unlockedMaxSupplyRef.current !== null &&
         maxSupplyRef.current !== null
       ) {
-        const settingsBefore = BitFlags.toBitFlag(
+        const settingsBefore = valuesToNftBitFlags(
           [
             transferableItemsRef.current.checked,
             true,
@@ -82,18 +83,18 @@ const CreateCollection = () => {
             unlockedAttributesRef.current.checked,
             unlockedMaxSupplyRef.current.checked,
           ],
-          true,
+          'PalletNftsCollectionSetting',
         );
 
         const settingsAfter = !unlockedMetadataRef.current.checked
-          ? BitFlags.toBitFlag(
+          ? valuesToNftBitFlags(
               [
                 transferableItemsRef.current.checked,
                 unlockedMetadataRef.current.checked,
                 unlockedAttributesRef.current.checked,
                 unlockedMaxSupplyRef.current.checked,
               ],
-              true,
+              'PalletNftsCollectionSetting',
             )
           : null;
 

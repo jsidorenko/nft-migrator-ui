@@ -29,12 +29,11 @@ import {
   NftMigrationData,
   SnapshotSignature,
 } from '@helpers/interfaces.ts';
+import { initNftBitFlags } from '@helpers/nftBitFlags.ts';
 import { routes } from '@helpers/routes.ts';
 import {
-  BitFlags,
   fetchJson,
   getCidHash,
-  getEnumOptions,
   getFetchableMetadataUrl,
   getFetchableUrl,
   stringOrNothing,
@@ -205,10 +204,9 @@ export const useCollections = () => {
                 return null;
               }
 
-              type CollectionSettings = PalletNftsCollectionSetting['type'];
+              type CollectionSetting = PalletNftsCollectionSetting['type'];
               const collectionConfig = config.unwrap().toJSON() as unknown as CollectionConfigJson;
-              const options = getEnumOptions(api, 'PalletNftsCollectionSetting') as CollectionSettings[];
-              const settings = new BitFlags<CollectionSettings>(options, true);
+              const settings = initNftBitFlags<CollectionSetting>(api, 'PalletNftsCollectionSetting');
 
               metadataIsLocked = !settings.has('UnlockedMetadata', collectionConfig.settings);
               attributesAreLocked = !settings.has('UnlockedAttributes', collectionConfig.settings);
@@ -481,9 +479,7 @@ export const useCollections = () => {
               result = {};
               if (collectionRoles.length) {
                 type CollectionRole = PalletNftsCollectionRole['type'];
-                const rolesBitflags = new BitFlags<CollectionRole>(
-                  getEnumOptions(api, 'PalletNftsCollectionRole') as CollectionRole[],
-                );
+                const rolesBitflags = initNftBitFlags<CollectionRole>(api, 'PalletNftsCollectionRole');
 
                 for (const record of collectionRoles) {
                   if (rolesBitflags.has('Admin', record.roles)) {

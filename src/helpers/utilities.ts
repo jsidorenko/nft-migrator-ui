@@ -1,9 +1,12 @@
 import { ApiPromise } from '@polkadot/api';
 import { getTypeDef } from '@polkadot/types';
+import { PalletNftsCollectionRole } from '@polkadot/types/lookup';
 import { AnyJson } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { ToBn } from '@polkadot/util/types';
 import { FormEvent } from 'react';
+
+import { BitFlags } from '@helpers/BitFlags.js';
 
 import { IMAGES_GATEWAY, IPFS_GATEWAY, IPFS_NATIVE_SCHEME, METADATA_GATEWAY } from './config.ts';
 import { ALTERNATE_BACKGROUND_CLASSNAME } from './reusableStyles.ts';
@@ -151,46 +154,3 @@ export const stringOrNothing = (value: unknown): string | undefined => {
 export const timeout = async (time: number) => {
   return new Promise((res) => setTimeout(res, time));
 };
-
-export const getEnumOptions = (api: ApiPromise, typeName: string): string[] => {
-  const { sub } = getTypeDef(api.createType(typeName).toRawType());
-  if (!sub || !Array.isArray(sub)) return [];
-
-  return sub
-    .sort((a, b) => Number(a.index) - Number(b.index))
-    .filter(({ name }) => name && !name.startsWith('__Unused'))
-    .map(({ name }) => name as string);
-};
-
-export class BitFlags<OptionsType> {
-  flags: Map<OptionsType, number>;
-  reverse: boolean;
-
-  // we use the reverse logic for collection and item settings
-  // for roles we use the non-reverse logic
-  static toBitFlag(values: boolean[], reverseLogic = false): number {
-    const bitFlag = values
-      .map((value) => (reverseLogic ? +!value : +value))
-      .reverse()
-      .join('');
-
-    return parseInt(bitFlag, 2);
-  }
-
-  constructor(options: Array<OptionsType>, reverse = false) {
-    this.reverse = reverse;
-    this.flags = options.reduce((memo, value, i) => {
-      memo.set(value, 1 << i);
-      return memo;
-    }, new Map());
-  }
-
-  has(checkFlag: OptionsType, value: number): boolean {
-    if (!this.flags.has(checkFlag)) {
-      throw new Error('Incorrect option provided');
-    }
-
-    const result = (value & (this.flags.get(checkFlag) as number)) === this.flags.get(checkFlag);
-    return this.reverse ? !result : result;
-  }
-}
