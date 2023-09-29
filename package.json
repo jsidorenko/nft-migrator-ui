@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.jsx",
+  "private": "true",
   "scripts": {
     "start": "netlify dev",
     "start:webpack": "webpack serve --config webpack.dev.js",

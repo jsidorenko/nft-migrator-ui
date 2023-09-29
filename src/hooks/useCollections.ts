@@ -936,9 +936,7 @@ export const useCollections = () => {
 
         // reconstruct nft objects from the signature data
         const MAX_CLAIMS = 100;
-        const activeBlockNumber = (await api.derive.chain.bestNumber()).toNumber();
         const now = (await api.rpc.chain.getHeader()).number.toNumber();
-        console.log({ activeBlockNumber, now });
         let foundNfts: NftMigrationData[] = [];
 
         for (const { data, signature } of snapshotData.signatures) {
