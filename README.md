@@ -26,7 +26,7 @@ Create a copy of .env file, name it .env.development and fill in the required da
 - `REACT_APP_METADATA_GATEWAY` - IPFS gateway to fetch the collections and items metadata.
 - `REACT_APP_IMAGES_GATEWAY` - IPFS gateway to fetch the images.
 
-### Start the app
+### Starting the app
 ```shell
 npm install
 npm start
@@ -78,7 +78,7 @@ async function signItems(api: ApiPromise, signingPair: KeyringPair, signNfts: Si
 }
 ```
 
-### Put offchain signature into extrinsic
+### Put the offchain signature into extrinsic
 ```ts
 /* 
   {
@@ -176,6 +176,37 @@ if (config.isSome) {
   const attributesAreLocked = !settings.has('UnlockedAttributes', collectionConfig.settings);
 }
 
+```
+
+**Read collection attributes**
+```ts
+const query = await api.query.nfts.attribute.entries(collectionId, null, 'CollectionOwner');
+const attributes = query.map(
+  ([
+     {
+       args: [, , , key],
+     },
+     data,
+   ]) => {
+    const value = data.isSome ? data.unwrap()[0].toPrimitive() : '';
+    return {
+      key: key.toPrimitive() as string,
+      value: value as string,
+    };
+  },
+);
+```
+
+**Update collection attributes**
+```ts
+enum SUPPORTED_ATTRIBUTE_KEYS {
+  SNAPSHOT = 'offchain-mint-snapshot',
+  PROVIDER = 'offchain-mint-ipfs-provider',
+}
+
+await api.tx.nfts
+  .setAttribute(collectionId, null, 'CollectionOwner', attributeKey, attributeValue)
+  .signAndSend(/*....*/);
 ```
 ## License
 
