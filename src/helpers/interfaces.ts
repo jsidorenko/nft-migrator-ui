@@ -1,14 +1,6 @@
 import { PalletNftsPreSignedMint } from '@polkadot/types/lookup';
 
-import {
-  ChainThemes,
-  ChainTitles,
-  MintTypes,
-  ModalStatusTypes,
-  RestrictionTypes,
-  StatusMessages,
-  ViewAsOptions,
-} from './config.ts';
+import { ChainThemes, ChainTitles, MintTypes, ModalStatusTypes, RestrictionTypes, StatusMessages } from './config.ts';
 
 // ==========
 // INTERFACES
@@ -191,10 +183,6 @@ export interface RestrictionMessage {
 export interface NftWitnessData {
   mintPrice?: string;
   ownedItem?: string;
-}
-
-export interface UiSettings {
-  viewAs: ViewAsOptions;
 }
 
 // =====

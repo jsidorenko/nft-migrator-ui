@@ -69,11 +69,6 @@ export enum ExtensionIds {
   WALLET_CONNECT = 'wallet-connect',
 }
 
-export enum ViewAsOptions {
-  CARDS = 'cards',
-  TABLE = 'table',
-}
-
 export enum SUPPORTED_ATTRIBUTE_KEYS {
   SNAPSHOT = 'offchain-mint-snapshot',
   PROVIDER = 'offchain-mint-ipfs-provider',
