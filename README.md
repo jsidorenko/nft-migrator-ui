@@ -81,25 +81,38 @@ async function signItems(api: ApiPromise, signingPair: KeyringPair, signNfts: Si
 ### Put the offchain signature into extrinsic
 ```ts
 /* 
-  {
-    preSignInfo: PalletNftsPreSignedMint;
-    signature: string;
-    signer: string;
-  }
+  Types:
+    preSignInfo: PalletNftsPreSignedMint
+    signature: string // 0x...
+    signer: string // account address
  */
 await api.tx.nfts
   .mintPreSigned(preSignInfo, { Sr25519: signature }, signer);
 
 ```
 
-### Reconstruct NFT data from the offchain signature
+### Reconstruct the mint data from the offchain signature object
 
 ```ts
 import type { PalletNftsPreSignedMint } from '@polkadot/types/lookup';
 
-const data = '0x123123...';
-const preSignedMint: PalletNftsPreSignedMint = api.createType('PalletNftsPreSignedMint', data);
+const signature = {
+   data: '0x00000000000000000000011cbd2d43530a44705ad088af313e18f80b53ef16b36177cd4b77b846f2a5f07c3020510000',
+   signature: '0x629aa837684efb0....19308b8f'
+};
+const preSignedMint: PalletNftsPreSignedMint = api.createType('PalletNftsPreSignedMint', signature.data);
 console.log(preSignedMint.toJSON());
+/*
+{
+  collection: 0,
+  item: 0,
+  attributes: [],
+  metadata: '0x',
+  onlyAccount: '5CiPPseXPECbkjWCa6MnjNokrgYjMqmKndv2rSnekmSK2DjL',
+  deadline: 5316656,
+  mintPrice: null
+}
+ */
 ```
 
 ### BitFlags
@@ -178,6 +191,7 @@ if (config.isSome) {
 
 ```
 
+### Collection attributes
 **Read collection attributes**
 ```ts
 const query = await api.query.nfts.attribute.entries(collectionId, null, 'CollectionOwner');
@@ -188,6 +202,8 @@ const attributes = query.map(
      },
      data,
    ]) => {
+    // NOTE: `.toString()` returns the hex value for the attribute's key/value
+    // use `.toPrimitive()` to get the decoded UTF-8 value
     const value = data.isSome ? data.unwrap()[0].toPrimitive() : '';
     return {
       key: key.toPrimitive() as string,
